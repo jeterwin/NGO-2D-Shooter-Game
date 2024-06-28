@@ -11,8 +11,10 @@ GameObject:
   - component: {fileID: 8257574915433457941}
   - component: {fileID: 5300255313795219624}
   - component: {fileID: 1953328912857438565}
+  - component: {fileID: 4281261112232922105}
+  - component: {fileID: 1450943762291825042}
   m_Layer: 0
-  m_Name: AK-47 1
+  m_Name: Shotgun
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -75,12 +77,12 @@ SpriteRenderer:
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: 120
-  m_Sprite: {fileID: 21300000, guid: c9ef79ba59db38f40bd698e29162563d, type: 3}
+  m_Sprite: {fileID: 512942090, guid: e0ea5760c5da42247bcab83c9c100113, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
   m_FlipY: 0
   m_DrawMode: 0
-  m_Size: {x: 10, y: 5}
+  m_Size: {x: 20.177341, y: 4}
   m_AdaptiveModeThreshold: 0.5
   m_SpriteTileMode: 0
   m_WasSpriteAssigned: 1
@@ -98,14 +100,49 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 6a3eb7de24671264ba33d05df123c9ad, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  damage: 0
-  fireRate: 0
-  magazineBullets: 0
-  startingBullets: 0
+  damage: 35
+  fireRate: 0.233
+  magazineBullets: 2
+  startingBullets: 2
   bulletPrefab: {fileID: 1570335359649092007, guid: 6f0650765ab84362aca42c800ec54d89, type: 3}
   clientBulletPrefab: {fileID: 6046974836645858157, guid: 7f56b9c8bed497b49853a2084f4171ec, type: 3}
   serverBulletPrefab: {fileID: 2778499593818351107, guid: afcc073173274494bb86d9dbcd1ffbdf, type: 3}
   gunMuzzle: {fileID: 4595534883612513372}
+--- !u!95 &4281261112232922105
+Animator:
+  serializedVersion: 5
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3558267362401152947}
+  m_Enabled: 1
+  m_Avatar: {fileID: 0}
+  m_Controller: {fileID: 9100000, guid: 687d10df2f6f00041b281fca36ef98c5, type: 2}
+  m_CullingMode: 0
+  m_UpdateMode: 0
+  m_ApplyRootMotion: 0
+  m_LinearVelocityBlending: 0
+  m_StabilizeFeet: 0
+  m_WarningMessage: 
+  m_HasTransformHierarchy: 1
+  m_AllowConstantClipSamplingOptimization: 1
+  m_KeepAnimatorStateOnDisable: 0
+  m_WriteDefaultValuesOnDisable: 0
+--- !u!114 &1450943762291825042
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3558267362401152947}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e8d0727d5ae3244e3b569694d3912374, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  TransitionStateInfoList: []
+  m_Animator: {fileID: 4281261112232922105}
 --- !u!1 &4135924497178314044
 GameObject:
   m_ObjectHideFlags: 0
@@ -131,7 +168,7 @@ Transform:
   m_GameObject: {fileID: 4135924497178314044}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 4.71, y: 1, z: 0}
+  m_LocalPosition: {x: 2.72, y: 0.06, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []

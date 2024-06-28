@@ -10,7 +10,7 @@ public class BulletScript : NetworkBehaviour
     [SerializeField] private GameObject playerHitFX;
     [SerializeField] private GameObject objectHitFX;
 
-    [SerializeField] private int bulletDamage;
+    private int bulletDamage;
 
     public int BulletDamage
     {
@@ -45,6 +45,11 @@ public class BulletScript : NetworkBehaviour
         if (!IsOwner) { return; }
 
         rb = GetComponent<Rigidbody2D>();
+    }
+
+    public void SetBulletDamage(int damage)
+    {
+        bulletDamage = damage;
     }
 
     private void SpawnParticles(Vector2 particlePosition, Quaternion particlesRotation, bool collision)

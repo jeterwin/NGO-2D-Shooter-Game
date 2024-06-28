@@ -8,8 +8,6 @@ using UnityEngine.UI;
 
 public class HealthDisplay : NetworkBehaviour
 {
-    [SerializeField] private GameObject deathScreen;
-
     [SerializeField] private Health health;
 
     [SerializeField] private Animator healthBarAnimator;

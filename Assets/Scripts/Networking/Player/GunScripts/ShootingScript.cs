@@ -6,10 +6,7 @@ using UnityEngine;
 
 public class ShootingScript : NetworkBehaviour
 {
-    [SerializeField] private Gun[] availableGuns;
     [SerializeField] private Gun currentGun;
-
-    private int currentGunIndex;
 
     public override void OnNetworkSpawn()
     {
@@ -26,35 +23,19 @@ public class ShootingScript : NetworkBehaviour
 
         if (Input.GetMouseButtonDown(0))
         {
-            //currentGun.Fire();
+            currentGun.Fire();
+
             PrimaryFireServerRpc(NetworkManager.Singleton.LocalClientId);
 
             SpawnDummyProjectile();
         }
-        if(Input.GetKeyDown(KeyCode.K))
-        {
-            TestServerRpc(1);
-        }
-        if(Input.GetKeyDown(KeyCode.J))
-        {
-            TestServerRpc(0);
-        }
     }
 
-    [ServerRpc]
-    private void TestServerRpc(int index)
+    public void SetWeapon(Gun gun)
     {
-        currentGun = availableGuns[index];
-
-        Test1ClientRpc(index);
+        currentGun = gun;
     }
-    [ClientRpc]
-    private void Test1ClientRpc(int index)
-    {
-        //if(!IsOwner) { return; }
-
-        currentGun = availableGuns[index];
-    }
+    
 
     [ServerRpc]
     private void PrimaryFireServerRpc(ulong shooterID)
@@ -65,6 +46,7 @@ public class ShootingScript : NetworkBehaviour
 
         if (bullet.TryGetComponent(out BulletScript bulletScript))
         {
+            bulletScript.SetBulletDamage(currentGun.damage);
             bulletScript.Rb.velocity = bullet.transform.right * bulletScript.ProjectileSpeed;
         }
 

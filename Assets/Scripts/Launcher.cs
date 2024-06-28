@@ -5,43 +5,50 @@ using TMPro;
 using UnityEngine.SceneManagement;
 using System;
 using Unity.Netcode;
+using UnityEngine.UI;
 
 public class Launcher : MonoBehaviour
 {
     public static Launcher Instance;
+
+    public const string PlayerPrefPlayerName = "PlayerName";
 
     [Header("Managers")]
     [SerializeField] private MapSelectorManager mapSelectorManager;
     [SerializeField] private GameModeManager gameModeManager;
 
     [Space(5)]
-    [SerializeField] private GameSettings gameSettings;
-    public string LevelToPlay;
-    [SerializeField] private GameObject startButton;
 
-    [SerializeField] private TextMeshProUGUI loadingText;
-    [SerializeField] private TextMeshProUGUI roomNameText;
-    [SerializeField] private TextMeshProUGUI errorText;
-    [SerializeField] private TextMeshProUGUI versionText;
-
+    [Header("Player Name Settings")]
     [SerializeField] private TMP_InputField nameInputField;
-    [SerializeField] private TMP_InputField joinCodeInputField;
 
     [SerializeField] private TextMeshProUGUI playerNameLabel;
+
+    [SerializeField] private Button setNameButton;
+
+    [SerializeField] private int minNameLength = 2;
+    [SerializeField] private int maxNameLength = 16;
+
+    [Space(5)]
+
+    [Header("Error Text")]
+    [SerializeField] private TextMeshProUGUI errorText;
+
+    [Space(5)]
+
+    [Header("Join Input Field")]
+
+    [SerializeField] private TMP_InputField joinCodeInputField;
 
     [Header("Screen Gameobjects")]
     [SerializeField] private GameObject creatingRoomPanel;
     [SerializeField] private GameObject loadingRoomPanel;
+    [SerializeField] private GameObject nameSelectPanel;
     [SerializeField] private GameObject errorPanel;
     [SerializeField] private GameObject menuButtons;
 
-    [Header("Display All Rooms")]
-    [SerializeField] private RoomButton theRoomButton;
-    [SerializeField] private Transform roomBtnTransform;
-    [SerializeField] private List<RoomButton> allRoomButtons = new();
 
-    private List<TMP_Text> allPlayerNames = new();
-
+    #region Methods
     private void Awake()
     {
         Instance = this;
@@ -53,8 +60,23 @@ public class Launcher : MonoBehaviour
         }
     }
 
-    #region Methods
-    
+    private void Start()
+    {
+        if(SystemInfo.graphicsDeviceType == UnityEngine.Rendering.GraphicsDeviceType.Null)
+        {
+            return;
+        }
+
+        PlayerPrefs.DeleteKey(PlayerPrefPlayerName);
+
+        bool hasSetName = PlayerPrefs.HasKey(PlayerPrefPlayerName);
+
+        nameSelectPanel.SetActive(!hasSetName);
+        menuButtons.SetActive(hasSetName);
+
+        HandlePlayerNameChange();
+    }
+
     public void CloseGame()
     {
         Application.Quit();
@@ -84,6 +106,21 @@ public class Launcher : MonoBehaviour
     {
         this.errorText.text = errorText;
         errorPanel.SetActive(true);
+    }
+
+    public void HandlePlayerNameChange()
+    {
+        setNameButton.interactable = 
+            nameInputField.text.Length >= minNameLength && 
+            nameInputField.text.Length <= maxNameLength;
+    }
+
+    public void Connect()
+    {
+        PlayerPrefs.SetString(PlayerPrefPlayerName, nameInputField.text);
+    
+        nameSelectPanel.SetActive(false);     
+        menuButtons.SetActive(true);
     }
 }
 #endregion

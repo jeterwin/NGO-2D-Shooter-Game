@@ -4,6 +4,7 @@ using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
+[RequireComponent(typeof(Lifetime))]
 public class KillFeedData : MonoBehaviour
 {
     public TextMeshProUGUI PlayerName1Txt

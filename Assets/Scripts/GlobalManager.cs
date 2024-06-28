@@ -9,6 +9,7 @@ using Unity.Networking.Transport.Relay;
 using Unity.Services.Relay;
 using Unity.Services.Relay.Models;
 using UnityEngine;
+using UnityEngine.Rendering;
 using UnityEngine.SceneManagement;
 
 public class GlobalManager : NetworkBehaviour
@@ -16,6 +17,10 @@ public class GlobalManager : NetworkBehaviour
     public static GlobalManager instance;
 
     NetworkVariable<FixedString64Bytes> joinCode = new NetworkVariable<FixedString64Bytes>();
+
+    [SerializeField] private VolumeProfile globalPostProcessing;
+    public VolumeProfile GlobalPostProcessing { get { return globalPostProcessing; } }
+
 
     [SerializeField] private TextMeshProUGUI joinCodeTxt;
 

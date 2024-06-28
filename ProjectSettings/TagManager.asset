@@ -3,7 +3,8 @@
 --- !u!78 &1
 TagManager:
   serializedVersion: 2
-  tags: []
+  tags:
+  - HealthSprite
   layers:
   - Default
   - TransparentFX
@@ -41,6 +42,6 @@ TagManager:
   - name: Default
     uniqueID: 0
     locked: 0
-  - name: Hidden
-    uniqueID: 870621381
+  - name: VisibleUI
+    uniqueID: 3473947377
     locked: 0

@@ -6,11 +6,17 @@ using UnityEngine;
 
 public class ShakeEffect : NetworkBehaviour
 {
+    [Header("Camera Shake Settings")]
     [SerializeField] private float amplitudeGain = 1f;
     [SerializeField] private float frequencyGain = 1f;
     [SerializeField] private float shakeTimer = 1f;
 
     [SerializeField] private CinemachineVirtualCamera vcam;
+
+    [Space(5)]
+
+    [Header("Post Processing Settings")]
+    //[SerializeField] private PostProcessingV
 
     private CinemachineBasicMultiChannelPerlin multiChannelPerlin;
 
