@@ -5,7 +5,7 @@ using System.Text;
 using Unity.Netcode;
 using UnityEngine;
 
-public class NetworkServer
+public class NetworkServer : IDisposable
 {
     private NetworkManager networkManager;
 
@@ -48,5 +48,39 @@ public class NetworkServer
         
         // We can check for profanities here
         response.Approved = true;
+    }
+
+    public UserData GetUserDataByClientId(ulong clientId)
+    {
+        if(clientIdToAuth.TryGetValue(clientId, out string authId)) 
+        {
+            if(authIdToUserData.TryGetValue(authId, out UserData userData))
+            {
+                return userData;
+            }
+            else
+            {
+                return null;
+            }
+        }
+        else
+        {
+            return null;
+        }
+    }
+
+    public void Dispose()
+    {
+        if(networkManager != null)
+        {
+            networkManager.ConnectionApprovalCallback -= ApprovalCheck;
+            networkManager.OnServerStarted -= OnNetworkReady;
+            networkManager.OnClientDisconnectCallback -= OnClientDisconnect;
+
+            if(networkManager.IsListening)
+            {
+                networkManager.Shutdown();
+            }
+        }
     }
 }

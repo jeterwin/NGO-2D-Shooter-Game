@@ -1,14 +1,8 @@
-using System;
 using System.Collections;
-using System.Collections.Generic;
-using TMPro;
 using Unity.Netcode;
-using Unity.Services.Authentication;
-using UnityEditor.Rendering;
 using UnityEngine;
 using UnityEngine.Rendering;
 using UnityEngine.Rendering.Universal;
-using UnityEngine.UI;
 
 public class Health : NetworkBehaviour
 {
@@ -16,6 +10,10 @@ public class Health : NetworkBehaviour
     private NetworkVariable<bool> isDead = new NetworkVariable<bool>();
 
     [SerializeField] private ShakeEffect shakeEffect;
+
+    [Header("Death Settings")]
+    [SerializeField] private GameObject deathParticles;
+    [SerializeField] private GameObject deathScreen;
 
     [Header("Critical Health Settings")]
     [SerializeField] private VolumeProfile volumeProfile;
@@ -28,25 +26,16 @@ public class Health : NetworkBehaviour
     
     [SerializeField] private float chromaticAberrationStrength = 0.2f;
 
+    [SerializeField] private GameObject killFeed;
+    [field: SerializeField] public float MaxHealth { get; private set; } = 100f;
+
+    [SerializeField] private PlayerData playerData;
+
+    [SerializeField] private HealthDisplay healthDisplay;
+
     private bool hasCriticalHealth;
 
     private Coroutine fadeInCoroutine;
-
-    [SerializeField] private GameObject deathScreen;
-
-    [SerializeField] private GameObject killFeed;
-
-    [field: SerializeField] public float MaxHealth { get; private set; } = 100f;
-
-    [Header("Respawn Variables")]
-    [SerializeField] private float respawnTimer = 3f;
-
-    public float RespawnTimer
-    {
-        get { return respawnTimer; }
-    }
-
-    private HealthDisplay healthDisplay;
 
     public override void OnNetworkDespawn()
     {
@@ -63,12 +52,17 @@ public class Health : NetworkBehaviour
             isDead.Value = false;
         }
 
-        healthDisplay = GetComponent<HealthDisplay>();
         volumeProfile = GlobalManager.instance.GlobalPostProcessing;
         // Subscribe to the isDead value change on both server and client
         if(IsClient)
         {
             isDead.OnValueChanged += (oldValue, newValue) => respawn(newValue);
+        }
+
+        if(!IsOwner)
+        {
+            deathScreen.transform.parent.gameObject.SetActive(false);
+            return;
         }
     }
 
@@ -80,7 +74,8 @@ public class Health : NetworkBehaviour
 
     public void RestoreHealth(int healValue)
     {
-        modifyHealth(healValue, 0);
+        // There are only a maximum of 16 players, so a value of 20 will never be reached
+        modifyHealth(healValue, 20);
     }
 
     private void modifyHealth(int value, ulong shooterID)
@@ -95,8 +90,38 @@ public class Health : NetworkBehaviour
         // We clamp so we can safely check if the value is 0
         if (CurrentHealth.Value == 0)
         {
-            isDead.Value = true;
-            MatchManager.Instance.createKillFeedServerRpc(shooterID, NetworkManager.Singleton.LocalClientId);
+            handleDying(shooterID);
+        }
+    }
+    [ClientRpc]
+    private void spawnDeathParticlesClientRpc()
+    {
+        if(IsOwner) { return; } 
+
+        Instantiate(deathParticles, transform.position, Quaternion.identity);
+    }
+    private void handleDying(ulong shooterID)
+    {
+        isDead.Value = true;
+
+        Instantiate(deathParticles, transform.position, Quaternion.identity);
+        spawnDeathParticlesClientRpc();
+        // Increase the deaths of the local player
+        playerData.PlayerDeaths.Value++;
+
+        increaseShooterKillCount(shooterID);
+    }
+
+    private void increaseShooterKillCount(ulong shooterID)
+    {
+        // Iterate through all the players and increase the kill count of the player that has the same name as the shooter
+        foreach (PlayerData player in Leaderboard.Instance.Players)
+        {
+            if (player.OwnerClientId != shooterID) { continue; }
+
+            player.PlayerKills.Value++;
+            MatchManager.Instance.createKillFeedServerRpc(player.PlayerName.Value, playerData.PlayerName.Value, player.OwnerClientId, OwnerClientId);
+            break;
         }
     }
 
@@ -195,7 +220,7 @@ public class Health : NetworkBehaviour
         deathScreen.SetActive(true);
 
         float timer = 0f;
-        while (timer < respawnTimer)
+        while (timer < PlayerSpawner.Instance.RespawnTime)
         {
             timer += Time.deltaTime;
             yield return null;

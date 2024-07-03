@@ -10,6 +10,8 @@ public class BulletScript : NetworkBehaviour
     [SerializeField] private GameObject playerHitFX;
     [SerializeField] private GameObject objectHitFX;
 
+    private const string playerLayerName = "Player";
+
     private int bulletDamage;
 
     public int BulletDamage
@@ -52,16 +54,15 @@ public class BulletScript : NetworkBehaviour
         bulletDamage = damage;
     }
 
-    private void SpawnParticles(Vector2 particlePosition, Quaternion particlesRotation, bool collision)
+    private void SpawnParticles(Vector2 particlePosition, Quaternion particlesRotation, bool hitPlayer)
     {
-        // If collision is true then we surely hit a wall, since 
-        Instantiate(collision == true ? objectHitFX : playerHitFX, particlePosition, particlesRotation);
+        Instantiate(hitPlayer == true ? playerHitFX : objectHitFX, particlePosition, particlesRotation);
     }
 
     private void OnTriggerEnter2D(Collider2D collision)
     {
         Vector2 closestPoint = collision.ClosestPoint(transform.position);
 
-        SpawnParticles(closestPoint, Quaternion.Euler(closestPoint), false);
+        SpawnParticles(closestPoint, Quaternion.Euler(closestPoint), collision.CompareTag(playerLayerName));
     }
 }

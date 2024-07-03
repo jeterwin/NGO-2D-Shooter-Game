@@ -1,16 +1,46 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Transactions;
 using Unity.Netcode;
 using UnityEngine;
 
 public class ShootingScript : NetworkBehaviour
 {
+    # region Variables
+
     [SerializeField] private Gun currentGun;
+
+    [SerializeField] PlayerData playerData;
+
+    [SerializeField] private GameObject shootingCanvas;
+
+    private InputHandler inputHandler;
+
+    private Vector3 recoilTransform = Vector2.zero;
+
+    private Collider2D playerCollider;
+
+    # endregion Variables
+
+    # region Getters
+
+    public InputHandler InputHandler { get { return inputHandler; } }
+
+    # endregion
+
 
     public override void OnNetworkSpawn()
     {
-        if(!IsOwner) { return; }
+        playerCollider = GetComponent<Collider2D>();
+
+        if(!IsOwner)
+        {
+            shootingCanvas.SetActive(false);
+            return;
+        }
+
+        inputHandler = GetComponent<InputHandler>();
     }
 
     public override void OnNetworkDespawn()
@@ -23,12 +53,14 @@ public class ShootingScript : NetworkBehaviour
 
         if (Input.GetMouseButtonDown(0))
         {
-            currentGun.Fire();
+            // The timer is ongoing, therefore we have shot recently => we can increase the shot count
+            recoilTransform = currentGun.GetRecoil();
 
             PrimaryFireServerRpc(NetworkManager.Singleton.LocalClientId);
 
             SpawnDummyProjectile();
         }
+
     }
 
     public void SetWeapon(Gun gun)
@@ -40,7 +72,11 @@ public class ShootingScript : NetworkBehaviour
     [ServerRpc]
     private void PrimaryFireServerRpc(ulong shooterID)
     {
-        GameObject bullet = Instantiate(currentGun.serverBulletPrefab, currentGun.gunMuzzle.position, Quaternion.identity);
+        currentGun.Fire();
+
+        GameObject bullet = Instantiate(currentGun.serverBulletPrefab, currentGun.gunMuzzle.position + recoilTransform, Quaternion.identity);
+
+        Physics2D.IgnoreCollision(playerCollider, bullet.GetComponent<Collider2D>());
 
         bullet.transform.up = currentGun.gunMuzzle.up;
 
@@ -52,7 +88,7 @@ public class ShootingScript : NetworkBehaviour
 
         if(bullet.TryGetComponent(out DamageOnImpact bulletDamageOnImpact))
         {
-            bulletDamageOnImpact.Shooter = shooterID;
+            bulletDamageOnImpact.ShooterID = OwnerClientId;
         }
 
         PrimaryFireClientRpc();
@@ -61,13 +97,17 @@ public class ShootingScript : NetworkBehaviour
     [ClientRpc]
     private void PrimaryFireClientRpc()
     {
+        currentGun.Fire();
+
         if(IsOwner) { return; }
 
         SpawnDummyProjectile();
     }
     private void SpawnDummyProjectile()
     {
-        GameObject bullet = Instantiate(currentGun.clientBulletPrefab, currentGun.gunMuzzle.position, Quaternion.identity);
+        GameObject bullet = Instantiate(currentGun.clientBulletPrefab, currentGun.gunMuzzle.position + recoilTransform, Quaternion.identity);
+
+        Physics2D.IgnoreCollision(playerCollider, bullet.GetComponent<Collider2D>());
 
         bullet.transform.up = currentGun.gunMuzzle.up;
 

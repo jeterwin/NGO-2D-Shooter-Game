@@ -12,6 +12,8 @@ GameObject:
   - component: {fileID: 5300255313795219624}
   - component: {fileID: 1953328912857438565}
   - component: {fileID: 2941649013567360513}
+  - component: {fileID: 2204340960741828940}
+  - component: {fileID: 3926948775740284155}
   m_Layer: 0
   m_Name: AssaultRifle
   m_TagString: Untagged
@@ -103,10 +105,14 @@ MonoBehaviour:
   fireRate: 0.267
   magazineBullets: 30
   startingBullets: 30
-  bulletPrefab: {fileID: 1570335359649092007, guid: 6f0650765ab84362aca42c800ec54d89, type: 3}
-  clientBulletPrefab: {fileID: 6046974836645858157, guid: 7f56b9c8bed497b49853a2084f4171ec, type: 3}
-  serverBulletPrefab: {fileID: 2778499593818351107, guid: 474acc255c78e6f47978ff7e1131793b, type: 3}
+  bulletPrefab: {fileID: 1570335359649092007, guid: 5b7108402585611419c92477b2ec2380, type: 3}
+  clientBulletPrefab: {fileID: 2838287725384042443, guid: 8452ebc935d48d545ac28ae14a82d40c, type: 3}
+  serverBulletPrefab: {fileID: 2101072901967757482, guid: 6b3c76aa83060454496301fc9d32ed0a, type: 3}
   gunMuzzle: {fileID: 4595534883612513372}
+  shotsForRecoil: 8
+  recoilWhenMoving: 0.025
+  shootingMaxRecoil: 0.025
+  coolingDownTime: 0.5
 --- !u!95 &2941649013567360513
 Animator:
   serializedVersion: 5
@@ -128,6 +134,116 @@ Animator:
   m_AllowConstantClipSamplingOptimization: 1
   m_KeepAnimatorStateOnDisable: 0
   m_WriteDefaultValuesOnDisable: 0
+--- !u!114 &2204340960741828940
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3558267362401152947}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e8d0727d5ae3244e3b569694d3912374, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  TransitionStateInfoList: []
+  m_Animator: {fileID: 2941649013567360513}
+--- !u!82 &3926948775740284155
+AudioSource:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3558267362401152947}
+  m_Enabled: 1
+  serializedVersion: 4
+  OutputAudioMixerGroup: {fileID: 24300002, guid: 4111d51a2a96f9646a32d6ae994f9105, type: 2}
+  m_audioClip: {fileID: 8300000, guid: 2223c048b7df5e94b9be1438f05d7b8d, type: 3}
+  m_PlayOnAwake: 0
+  m_Volume: 1
+  m_Pitch: 1
+  Loop: 0
+  Mute: 0
+  Spatialize: 0
+  SpatializePostEffects: 0
+  Priority: 128
+  DopplerLevel: 0
+  MinDistance: 0
+  MaxDistance: 10
+  Pan2D: 0
+  rolloffMode: 1
+  BypassEffects: 0
+  BypassListenerEffects: 0
+  BypassReverbZones: 0
+  rolloffCustomCurve:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 3
+      time: 0
+      value: 1
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0.33333334
+      outWeight: 0.33333334
+    - serializedVersion: 3
+      time: 1
+      value: 0
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0.33333334
+      outWeight: 0.33333334
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
+  panLevelCustomCurve:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 3
+      time: 0
+      value: 1
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0.33333334
+      outWeight: 0.33333334
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
+  spreadCustomCurve:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 3
+      time: 0
+      value: 0
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0.33333334
+      outWeight: 0.33333334
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
+  reverbZoneMixCustomCurve:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 3
+      time: 0
+      value: 1
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0.33333334
+      outWeight: 0.33333334
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
 --- !u!1 &4135924497178314044
 GameObject:
   m_ObjectHideFlags: 0

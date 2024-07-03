@@ -14,12 +14,12 @@ using Unity.Services.Relay.Models;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
-public class ClientGameManager
+public class ClientGameManager : IDisposable
 {
     private const string MainSceneName = "MainScene";
     private JoinAllocation joinAllocation;
 
-    private NetworkClient networkClient;
+    public NetworkClient NetworkClient { get; private set; }
     public JoinAllocation JoinAllocation
     {
         get { return joinAllocation; }
@@ -30,15 +30,12 @@ public class ClientGameManager
         // Auth player
         await UnityServices.InitializeAsync();
 
-        networkClient = new NetworkClient(NetworkManager.Singleton);
+        NetworkClient = new NetworkClient(NetworkManager.Singleton);
 
         AuthState authState = await AuthWrapper.DoAuth();
 
         if(authState == AuthState.Authenticated)
         {
-            int value = UnityEngine.Random.Range(0, 9999);
-
-            await AuthenticationService.Instance.UpdatePlayerNameAsync("TEST" + value);
             return true;
         }
 
@@ -79,5 +76,10 @@ public class ClientGameManager
         NetworkManager.Singleton.NetworkConfig.ConnectionData = payloadBytes;
 
         NetworkManager.Singleton.StartClient();
+    }
+
+    public void Dispose()
+    {
+        NetworkClient?.Dispose();
     }
 }

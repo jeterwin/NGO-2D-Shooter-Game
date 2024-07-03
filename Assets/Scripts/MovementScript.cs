@@ -9,11 +9,10 @@ using UnityEngine;
 [RequireComponent(typeof(InputHandler), typeof(CameraScript), typeof(ShootingScript))]
 public class MovementScript : NetworkBehaviour
 {
-    [field: SerializeField] public string PlayerName { get; private set; }
     [SerializeField] private float movementSpeed = 1f;
 
     InputHandler inputHandler;
-    public override async void OnNetworkSpawn()
+    public override void OnNetworkSpawn()
     {
         if(!IsOwner) 
         { 
@@ -22,7 +21,6 @@ public class MovementScript : NetworkBehaviour
         }
 
         inputHandler = GetComponent<InputHandler>();
-        PlayerName = await AuthenticationService.Instance.GetPlayerNameAsync();
     }
 
     public override void OnNetworkDespawn()

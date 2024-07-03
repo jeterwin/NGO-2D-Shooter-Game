@@ -13,13 +13,17 @@ public class CameraScript : NetworkBehaviour
     [SerializeField] private Transform gunHolderGO;
     [SerializeField] private Transform body;
 
+    private AudioListener audioListener;
     private InputHandler inputHandler;
     public override void OnNetworkSpawn()
     {
+        audioListener = mainCam.GetComponent<AudioListener>();
+
         if(!IsOwner) 
         { 
             vCam.enabled = false;
             mainCam.enabled = false;
+            audioListener.enabled = false;
             enabled = false;
             return;
         }

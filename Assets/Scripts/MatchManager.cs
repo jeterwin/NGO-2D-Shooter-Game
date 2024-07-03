@@ -19,12 +19,17 @@ public class MatchManager : NetworkBehaviour
     [SerializeField] private Transform killFeedParent;
 
     [Space(5)]
-
     [Header("Match Timer Settings")]
     [SerializeField] private TextMeshProUGUI matchTimerText;
 
     [SerializeField] private NetworkVariable<float> matchTimer = new NetworkVariable<float>(300f); // 300 Seconds, 5 minutes per match
 
+    [Space(5)]
+    [Header("Match End Settings")]
+    [SerializeField] private GameObject endScreen;
+
+    [SerializeField] private float endScreenDisplayTime = 4f;
+    [SerializeField] private float timeToEndMatch = 10f;
     private void Awake()
     {
         Instance = this;
@@ -44,10 +49,52 @@ public class MatchManager : NetworkBehaviour
     {
         TimeSpan timeSpan = TimeSpan.FromSeconds(newValue);
 
+        if(timeSpan.TotalSeconds <= 0)
+        {
+            matchTimer.OnValueChanged -= HandleMatchTimer;
+
+            StartCoroutine(endSequence());
+            return;
+        }
+
         // Format the TimeSpan to a string "m:ss"
         string formattedTime = string.Format("{0}:{1:D2}", (int)timeSpan.TotalMinutes, timeSpan.Seconds);
 
         matchTimerText.text = formattedTime;
+    }
+
+    private IEnumerator endSequence()
+    {
+        matchTimerText.enabled = false;
+        endScreen.SetActive(true);
+
+        disablePlayersInputs();
+
+        yield return new WaitForSeconds(endScreenDisplayTime);
+
+        Leaderboard.Instance.EndGameScreen();
+
+        yield return new WaitForSeconds(timeToEndMatch);
+
+        disconnectPlayers();
+
+        yield return null;
+    }
+
+    private static void disablePlayersInputs()
+    {
+        foreach (PlayerData playerData in Leaderboard.Instance.Players)
+        {
+            playerData.DisablePlayerInputs();
+        }
+    }
+
+    private static void disconnectPlayers()
+    {
+        foreach (PlayerData playerData in Leaderboard.Instance.Players)
+        {
+            playerData.NetworkManager.Shutdown();
+        }
     }
 
     private void Update()
@@ -58,18 +105,18 @@ public class MatchManager : NetworkBehaviour
     }
 
     [ServerRpc(RequireOwnership = false)]
-    public void createKillFeedServerRpc(ulong shooterID, ulong shotPlayerID)
+    public void createKillFeedServerRpc(FixedString32Bytes shooter, FixedString32Bytes shotPlayer, ulong shooterID, ulong shotPlayerID)
     {
-        createKillFeedClientRpc(shooterID, shotPlayerID);
+        createKillFeedClientRpc(shooter, shotPlayer, shooterID, shotPlayerID);
     }
 
     [ClientRpc]
-    private void createKillFeedClientRpc(ulong shooterID, ulong shotPlayerID)
+    private void createKillFeedClientRpc(FixedString32Bytes shooter, FixedString32Bytes shotPlayer, ulong shooterID, ulong shotPlayerID)
     {
-        createKillFeed(shooterID, shotPlayerID);
+        createKillFeed(shooter, shotPlayer, shooterID, shotPlayerID);
     }
 
-    private void createKillFeed(ulong shooterID, ulong shotPlayerID)
+    private void createKillFeed(FixedString32Bytes shooter, FixedString32Bytes shotPlayer, ulong shooterID, ulong shotPlayerID)
     {
         GameObject killFeedGO = Instantiate(killFeedPrefab, killFeedParent, false);
 
@@ -78,14 +125,14 @@ public class MatchManager : NetworkBehaviour
         KillFeedData killFeedData = killFeedGO.GetComponent<KillFeedData>();
 
         setKillFeedTxtColors(shooterID, shotPlayerID, killFeedData);
-        setKillFeedTxt(shooterID, shotPlayerID, killFeedData);
+        setKillFeedTxt(shooter.Value, shotPlayer.Value, killFeedData);
     }
 
-    private static void setKillFeedTxt(ulong shooterID, ulong shotPlayerID, KillFeedData killFeedData)
+    private static void setKillFeedTxt(FixedString32Bytes shooterName, FixedString32Bytes shotPlayerName, KillFeedData killFeedData)
     {
-        killFeedData.SetPlayer1Name("Player " + shooterID);
+        killFeedData.SetPlayer1Name(shooterName.Value);
         //killFeedData.SetWeaponImage();
-        killFeedData.SetPlayer2Name("Player " + shotPlayerID);
+        killFeedData.SetPlayer2Name(shotPlayerName.Value);
     }
 
     private static void setKillFeedTxtColors(ulong shooterID, ulong shotPlayerID, KillFeedData killFeedData)
@@ -93,18 +140,18 @@ public class MatchManager : NetworkBehaviour
         // We got shot, therefore we only highlight the 2nd name
         if (shotPlayerID == NetworkManager.Singleton.LocalClientId)
         {
-            killFeedData.PlayerName1Txt.color = Color.white;
+            killFeedData.PlayerName1Txt.color = Color.black;
         }
         // We were the shooter, highlight the 1st name
         else if (shooterID == NetworkManager.Singleton.LocalClientId)
         {
-            killFeedData.PlayerName2Txt.color = Color.white;
+            killFeedData.PlayerName2Txt.color = Color.black;
         }
         // We are neither the shooter or the shot player, make both texts white
         else
         {
-            killFeedData.PlayerName1Txt.color = Color.white;
-            killFeedData.PlayerName2Txt.color = Color.white;
+            killFeedData.PlayerName1Txt.color = Color.black;
+            killFeedData.PlayerName2Txt.color = Color.black;
         }
     }
 

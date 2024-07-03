@@ -1,11 +1,12 @@
 using System.Collections;
 using System.Collections.Generic;
+using Unity.Collections;
 using Unity.Netcode;
 using UnityEngine;
 
 public class DamageOnImpact : MonoBehaviour
 {
-    public ulong Shooter;
+    public ulong ShooterID;
 
     [SerializeField] private BulletScript bullet;
 
@@ -20,7 +21,7 @@ public class DamageOnImpact : MonoBehaviour
         {
             if(collision.TryGetComponent(out Health healthScript))
             {
-                healthScript.TakeDamage(bullet.BulletDamage, Shooter);
+                healthScript.TakeDamage(bullet.BulletDamage, ShooterID);
             }
         }
     }

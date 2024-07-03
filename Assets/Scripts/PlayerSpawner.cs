@@ -11,6 +11,9 @@ public class PlayerSpawner : NetworkBehaviour
 
     [SerializeField] private float respawnTime = 3f;
 
+    public float RespawnTime
+    { get { return respawnTime; } }
+
     [SerializeField] private GameObject playerPrefab;
     [SerializeField] private GameObject deathParticlesPrefab;
 
@@ -22,11 +25,6 @@ public class PlayerSpawner : NetworkBehaviour
     private void Start()
     {
         SpawnPlayerServerRpc();
-    }
-
-    public void Die(string killerName)
-    {
-
     }
 
     public List<ulong> GetAllPlayerIDs()

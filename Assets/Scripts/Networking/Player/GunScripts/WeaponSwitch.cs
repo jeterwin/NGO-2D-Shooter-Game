@@ -16,7 +16,7 @@ public class WeaponSwitch : NetworkBehaviour
     [SerializeField] private Color unequippedGunColor;
     [SerializeField] private Color equippedGunColor;
 
-    private ShootingScript shootingScript;
+    [SerializeField] private ShootingScript shootingScript;
 
     private int currentGunIndex = 0;
     int oldCurrentGun = 0;
@@ -24,7 +24,6 @@ public class WeaponSwitch : NetworkBehaviour
     private float mouseWheelInput;
     public override void OnNetworkSpawn()
     {
-        shootingScript = GetComponent<ShootingScript>();
         updateAvailableGuns();
 
         SwitchWeaponServerRpc(currentGunIndex);
@@ -72,7 +71,9 @@ public class WeaponSwitch : NetworkBehaviour
         availableGuns.Clear();
         for(int i = 0; i < gunParentTransform.childCount; i++)
         {
+            // Store each gun and then make sure that they all store a reference of the player's input handler
             availableGuns.Add(gunParentTransform.GetChild(i).GetComponent<Gun>());
+            availableGuns[i].InitializeGun(shootingScript.InputHandler);
         }
     }
 

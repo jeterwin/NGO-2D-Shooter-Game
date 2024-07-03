@@ -15,7 +15,7 @@ using Unity.Services.Lobbies.Models;
 using System.Text;
 using Unity.Services.Authentication;
 
-public class HostGameManager
+public class HostGameManager : IDisposable
 {
     public Allocation Allocation { get; private set; }
 
@@ -23,7 +23,7 @@ public class HostGameManager
     private string lobbyId;
     private const int MaxConnections = 16;
 
-    private NetworkServer networkServer;
+    public NetworkServer NetworkServer { get; private set; }
     public async Task StartHostAsync(string levelName)
     {
         // Try to create a session with max 16 players
@@ -79,7 +79,7 @@ public class HostGameManager
             return;
         }
 
-        networkServer = new NetworkServer(NetworkManager.Singleton);
+        NetworkServer = new NetworkServer(NetworkManager.Singleton);
 
         // The host doesn't set this data, so we should also send it over the network
         // so it doesn't return an error
@@ -108,5 +108,26 @@ public class HostGameManager
             // More performant than usual new
             yield return delay;
         }
+    }
+
+    public async void Dispose()
+    {
+        if(HostSingleton.instance)
+        HostSingleton.Instance.StopCoroutine(nameof(HeartbeatLobby));
+
+        if(!string.IsNullOrEmpty(lobbyId))
+        {
+            try
+            {
+                await Lobbies.Instance.DeleteLobbyAsync(lobbyId);
+            }
+            catch (LobbyServiceException e) 
+            {
+                Debug.Log(e);
+            }
+            lobbyId = string.Empty;
+        }
+
+        NetworkServer?.Dispose();
     }
 }
