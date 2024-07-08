@@ -86,7 +86,8 @@ public class Launcher : MonoBehaviour
     {
         menuButtons.SetActive(false);
         creatingRoomPanel.SetActive(true);
-        await HostSingleton.Instance.GameManager.StartHostAsync(mapSelectorManager.GetSelectedLevelName());
+        await HostSingleton.Instance.GameManager.StartHostAsync(mapSelectorManager.GetSelectedLevelName() 
+            + GameModeManager.Instance.CurrentGameMode.ToString());
     }
 
     public async void StartClient()

@@ -323,7 +323,7 @@ MonoBehaviour:
   texts:
   - {fileID: 2229300551229648302}
   - {fileID: 7790433454581257540}
-  timerToFadeOut: 6
+  timerToFadeOut: 10
 --- !u!114 &5068651206440768295
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -331,12 +331,12 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 5197225421061018568}
-  m_Enabled: 1
+  m_Enabled: 0
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 6deb5f7404d50a244aad338079355012, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  lifetime: 6
+  lifetime: 10
 --- !u!1 &6468686864326435396
 GameObject:
   m_ObjectHideFlags: 0

@@ -11,9 +11,12 @@ public class ShootingScript : NetworkBehaviour
 
     [SerializeField] private Gun currentGun;
 
-    [SerializeField] PlayerData playerData;
+    [SerializeField] private PlayerData playerData;
+
+    [SerializeField] private Crosshair playerCrosshair;
 
     [SerializeField] private GameObject shootingCanvas;
+    [SerializeField] private GameObject weaponLight;
 
     private InputHandler inputHandler;
 
@@ -25,10 +28,16 @@ public class ShootingScript : NetworkBehaviour
 
     # region Getters
 
-    public InputHandler InputHandler { get { return inputHandler; } }
+    public Gun CurrentGun 
+    { 
+        get { return currentGun; } 
+    }
+    public InputHandler InputHandler 
+    { 
+        get { return inputHandler; } 
+    }
 
     # endregion
-
 
     public override void OnNetworkSpawn()
     {
@@ -36,6 +45,7 @@ public class ShootingScript : NetworkBehaviour
 
         if(!IsOwner)
         {
+            weaponLight.SetActive(false);
             shootingCanvas.SetActive(false);
             return;
         }
@@ -53,14 +63,25 @@ public class ShootingScript : NetworkBehaviour
 
         if (Input.GetMouseButtonDown(0))
         {
-            // The timer is ongoing, therefore we have shot recently => we can increase the shot count
+            if (!currentGun.CanShoot) { return; }
+
+            currentGun.StartShootingTimer();
+
             recoilTransform = currentGun.GetRecoil();
 
             PrimaryFireServerRpc(NetworkManager.Singleton.LocalClientId);
 
-            SpawnDummyProjectile();
+            SpawnProjectile(currentGun.ClientBulletPrefab);
         }
 
+        handleShootingTimer();
+    }
+
+    private void handleShootingTimer()
+    {
+        if (CurrentGun.GunshotInterval <= 0f) { return; }
+
+        currentGun.GunshotInterval -= Time.deltaTime;
     }
 
     public void SetWeapon(Gun gun)
@@ -72,18 +93,14 @@ public class ShootingScript : NetworkBehaviour
     [ServerRpc]
     private void PrimaryFireServerRpc(ulong shooterID)
     {
-        currentGun.Fire();
+        currentGun.PlayFX();
 
-        GameObject bullet = Instantiate(currentGun.serverBulletPrefab, currentGun.gunMuzzle.position + recoilTransform, Quaternion.identity);
-
-        Physics2D.IgnoreCollision(playerCollider, bullet.GetComponent<Collider2D>());
-
-        bullet.transform.up = currentGun.gunMuzzle.up;
+        // The server will spawn the bullet with the damage script attached
+        GameObject bullet = SpawnProjectile(currentGun.ServerBulletPrefab);
 
         if (bullet.TryGetComponent(out BulletScript bulletScript))
         {
-            bulletScript.SetBulletDamage(currentGun.damage);
-            bulletScript.Rb.velocity = bullet.transform.right * bulletScript.ProjectileSpeed;
+            bulletScript.SetBulletDamage(currentGun.Damage);
         }
 
         if(bullet.TryGetComponent(out DamageOnImpact bulletDamageOnImpact))
@@ -97,24 +114,30 @@ public class ShootingScript : NetworkBehaviour
     [ClientRpc]
     private void PrimaryFireClientRpc()
     {
-        currentGun.Fire();
+        currentGun.ConsumeAmmo(currentGun.BulletsConsumedPerShot);
+
+        currentGun.PlayFX();
 
         if(IsOwner) { return; }
 
-        SpawnDummyProjectile();
+        // The clients will spawn the bullet with no damage script attached
+        SpawnProjectile(currentGun.ClientBulletPrefab);
     }
-    private void SpawnDummyProjectile()
+    private GameObject SpawnProjectile(GameObject bulletPrefab)
     {
-        GameObject bullet = Instantiate(currentGun.clientBulletPrefab, currentGun.gunMuzzle.position + recoilTransform, Quaternion.identity);
+        GameObject bullet = Instantiate(bulletPrefab, currentGun.GunMuzzle.position + recoilTransform, Quaternion.identity);
 
+        // We make sure the player can't hit himself
         Physics2D.IgnoreCollision(playerCollider, bullet.GetComponent<Collider2D>());
 
-        bullet.transform.up = currentGun.gunMuzzle.up;
+        // We set the direction to the muzzle's forward
+        bullet.transform.up = currentGun.GunMuzzle.up;
 
         if (bullet.TryGetComponent(out BulletScript bulletScript))
         {
-            //bulletScript.ShooterId = shooterId;
             bulletScript.Rb.velocity = bullet.transform.right * bulletScript.ProjectileSpeed;
         }
+
+        return bullet;
     }
 }

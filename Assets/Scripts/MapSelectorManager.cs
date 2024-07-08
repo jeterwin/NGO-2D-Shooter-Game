@@ -13,7 +13,6 @@ public class MapSelectorManager : MonoBehaviour
 
     [SerializeField] private TextMeshProUGUI currentMapNameTxt;
 
-
     private int currentMap = 0;
     int modulus(int a, int b)
     {
@@ -21,11 +20,18 @@ public class MapSelectorManager : MonoBehaviour
     }
     private void Start()
     {
+        updateDisplayedMaps();
+
+        updateLevelNameTxt();
+    }
+
+    private void updateDisplayedMaps()
+    {
         mapImages[0].sprite = levels[modulus(currentMap - 1, levels.Length)].LevelSprite;
         mapImages[1].sprite = levels[modulus(currentMap, levels.Length)].LevelSprite;
         mapImages[2].sprite = levels[modulus(currentMap + 1, levels.Length)].LevelSprite;
-        updateLevelNameTxt();
     }
+
     public void ChangeMapRight()
     {
         currentMap++;
@@ -33,9 +39,8 @@ public class MapSelectorManager : MonoBehaviour
         {
             currentMap = 0;
         }
-        mapImages[0].sprite = levels[modulus(currentMap - 1, levels.Length)].LevelSprite;
-        mapImages[1].sprite = levels[modulus(currentMap, levels.Length)].LevelSprite;
-        mapImages[2].sprite = levels[modulus(currentMap + 1, levels.Length)].LevelSprite;
+
+        updateDisplayedMaps();
         updateLevelNameTxt();
     }
     public void ChangeMapLeft()
@@ -45,9 +50,7 @@ public class MapSelectorManager : MonoBehaviour
         {
             currentMap = levels.Length - 1;
         }
-        mapImages[0].sprite = levels[modulus(currentMap - 1, levels.Length)].LevelSprite;
-        mapImages[1].sprite = levels[modulus(currentMap, levels.Length)].LevelSprite;
-        mapImages[2].sprite = levels[modulus(currentMap + 1, levels.Length)].LevelSprite;
+        updateDisplayedMaps();
         updateLevelNameTxt();
     }
 

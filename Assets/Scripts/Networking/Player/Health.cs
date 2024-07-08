@@ -1,4 +1,7 @@
+using System;
 using System.Collections;
+using System.Collections.Generic;
+using System.Threading;
 using Unity.Netcode;
 using UnityEngine;
 using UnityEngine.Rendering;
@@ -15,6 +18,9 @@ public class Health : NetworkBehaviour
     [SerializeField] private GameObject deathParticles;
     [SerializeField] private GameObject deathScreen;
 
+    [SerializeField] private float droppedWeaponRadius = 1.5f;
+
+
     [Header("Critical Health Settings")]
     [SerializeField] private VolumeProfile volumeProfile;
 
@@ -27,11 +33,17 @@ public class Health : NetworkBehaviour
     [SerializeField] private float chromaticAberrationStrength = 0.2f;
 
     [SerializeField] private GameObject killFeed;
+
     [field: SerializeField] public float MaxHealth { get; private set; } = 100f;
+
+    [Space(5)]
+    [Header("Health Settings")]
 
     [SerializeField] private PlayerData playerData;
 
     [SerializeField] private HealthDisplay healthDisplay;
+
+    [SerializeField] private WeaponSwitch weaponSwitch;
 
     private bool hasCriticalHealth;
 
@@ -93,19 +105,19 @@ public class Health : NetworkBehaviour
             handleDying(shooterID);
         }
     }
-    [ClientRpc]
-    private void spawnDeathParticlesClientRpc()
+    private void spawnDeathParticles()
     {
-        if(IsOwner) { return; } 
+        if(!IsServer) { return; } 
 
-        Instantiate(deathParticles, transform.position, Quaternion.identity);
+        GameObject go = Instantiate(deathParticles, transform.position, Quaternion.identity);
+        go.GetComponent<NetworkObject>().Spawn(true);
     }
     private void handleDying(ulong shooterID)
     {
         isDead.Value = true;
 
         Instantiate(deathParticles, transform.position, Quaternion.identity);
-        spawnDeathParticlesClientRpc();
+        spawnDeathParticles();
         // Increase the deaths of the local player
         playerData.PlayerDeaths.Value++;
 
@@ -219,6 +231,10 @@ public class Health : NetworkBehaviour
         isDead.Value = true;
         deathScreen.SetActive(true);
 
+        dropGuns();
+
+        healthDisplay.OnDeath?.Invoke();
+
         float timer = 0f;
         while (timer < PlayerSpawner.Instance.RespawnTime)
         {
@@ -229,6 +245,8 @@ public class Health : NetworkBehaviour
         // Pick random spawn point and change player's position there
         respawnAtRandomPos();
 
+        healthDisplay.OnRespawn?.Invoke();
+
         deathScreen.SetActive(false);
         isDead.Value = false;
 
@@ -236,6 +254,23 @@ public class Health : NetworkBehaviour
         checkCriticalHealth();
 
         yield return null;
+    }
+
+    private void dropGuns()
+    {
+        if(!IsServer) { return; }
+
+        for (int i = 0; i < weaponSwitch.ListCount; i++)
+        {
+            // Basically, each gun will refer to a gun from a master gun list, those guns will hold a reference to what kind of object
+            // should be spawned in
+            int index = weaponSwitch.AvailableGuns[i].GunIndexInMasterGunList;
+
+            WeaponPickup droppedGun = Instantiate(weaponSwitch.MasterGunList.WeaponPickups[index], 
+                transform.position + UnityEngine.Random.insideUnitSphere * droppedWeaponRadius, Quaternion.identity);
+            // Sync guns somehow
+            droppedGun.GetComponent<NetworkObject>().Spawn();
+        }
     }
 
     private void respawnAtRandomPos()

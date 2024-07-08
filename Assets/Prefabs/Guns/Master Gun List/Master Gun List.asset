@@ -1,0 +1,18 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 38001e77cc4948648a4873cd2e1c174e, type: 3}
+  m_Name: Master Gun List
+  m_EditorClassIdentifier: 
+  WeaponPickups:
+  - {fileID: -2112800359115153322, guid: ea17356dcbe197641bd211133f5205d0, type: 3}
+  - {fileID: -2112800359115153322, guid: 94c35154f384f6b45ac55468d232692f, type: 3}
+  - {fileID: -2112800359115153322, guid: a14a45b49b58b7a4fad023c298ff8dd4, type: 3}

@@ -1,15 +1,23 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 using Unity.Services.Lobbies;
 using Unity.Services.Lobbies.Models;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class LobbiesList : MonoBehaviour
 {
+    [SerializeField] private GameObject joinRoomScreen;
+
     [SerializeField] private Transform lobbyItemParent;
 
+    [SerializeField] private Button refreshLobbiesBtn;
+
     [SerializeField] private LobbyItem lobbyItemPrefab;
+
+    [SerializeField] private int refreshLobbyCooldown = 10000; // In milliseconds
 
     private bool isJoining;
     private bool isRefreshing;
@@ -25,6 +33,7 @@ public class LobbiesList : MonoBehaviour
         if(isRefreshing) { return; }
 
         isRefreshing = true;
+        refreshLobbiesBtn.interactable = false;
 
         try
         {
@@ -65,6 +74,16 @@ public class LobbiesList : MonoBehaviour
             Debug.Log(e);
         }
 
+        await startRefreshingCooldown();
+    }
+
+    private async Task startRefreshingCooldown()
+    {
+        await Task.Delay(refreshLobbyCooldown);
+        if(refreshLobbiesBtn)
+        {
+            refreshLobbiesBtn.interactable = true;
+        }
         isRefreshing = false;
     }
 
@@ -73,6 +92,7 @@ public class LobbiesList : MonoBehaviour
         if(isJoining) return;
 
         isJoining = true;
+        joinRoomScreen.SetActive(true);
 
         try
         {

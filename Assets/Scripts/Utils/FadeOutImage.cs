@@ -11,8 +11,11 @@ public class FadeOutImage : MonoBehaviour
     [SerializeField] private TextMeshProUGUI[] texts;
 
     [SerializeField] private float timerToFadeOut = 1f;
-
-    public void StartFading()
+    private void Start()
+    {
+        startFading();
+    }
+    private void startFading()
     {
         for(int i = 0; i < images.Length; i++)
         {

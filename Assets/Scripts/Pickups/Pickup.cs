@@ -1,18 +1,17 @@
 using System.Collections;
 using System.Collections.Generic;
+using Unity.Netcode;
 using UnityEngine;
 
-public class Pickup : MonoBehaviour
+public abstract class Pickup : NetworkBehaviour
 {
-    // Start is called before the first frame update
-    void Start()
-    {
-        
-    }
+    public const string PlayerTag = "Player";
 
-    // Update is called once per frame
-    void Update()
-    {
-        
+    [SerializeField] private GameObject pickedUpFX;
+
+    public virtual void PickupItem() 
+    { 
+        // Spawn the particles
+        Instantiate(pickedUpFX, transform.position, Quaternion.identity);
     }
 }

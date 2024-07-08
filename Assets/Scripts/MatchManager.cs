@@ -1,12 +1,8 @@
 using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.SceneManagement;
 using System;
 using TMPro;
 using Unity.Netcode;
-using Unity.Services.Relay;
-using System.Threading.Tasks;
 using Unity.Collections;
 
 public class MatchManager : NetworkBehaviour
@@ -28,8 +24,13 @@ public class MatchManager : NetworkBehaviour
     [Header("Match End Settings")]
     [SerializeField] private GameObject endScreen;
 
+    [SerializeField] private Color32 criticalTimerTextColor = Color.red;
+
+    [SerializeField] private float criticalTimerPeriod = 10f; // When there are only 10 seconds remaining, the timer will turn red
     [SerializeField] private float endScreenDisplayTime = 4f;
-    [SerializeField] private float timeToEndMatch = 10f;
+    [SerializeField] private float timeToEndMatch = 300f;
+
+    private const float criticalPeriodTimer = 10f;
     private void Awake()
     {
         Instance = this;
@@ -43,8 +44,40 @@ public class MatchManager : NetworkBehaviour
     public override void OnNetworkSpawn()
     {
         matchTimer.OnValueChanged += HandleMatchTimer;
+
+        if(!IsServer) { return; }
+
+        StartCoroutine(checkCriticalTimer());
+    }
+    private IEnumerator checkCriticalTimer()
+    {
+        while(true)
+        {
+            TimeSpan timeSpan = TimeSpan.FromSeconds(matchTimer.Value);
+
+            if(timeSpan.TotalSeconds < criticalTimerPeriod)
+            {
+                criticalTimeRemainingServerRpc();
+                yield break;
+            }
+            // We only run this check every 10 seconds because this counter will only stop when the game has 10 seconds left
+            // there is no reason to run it every second and create more network packets.
+            yield return new WaitForSeconds(criticalPeriodTimer);
+        }
     }
 
+    [ServerRpc]
+    private void criticalTimeRemainingServerRpc()
+    {
+        matchTimerText.color = criticalTimerTextColor;
+        criticalTimeRemainingClientRpc();
+    }
+
+    [ClientRpc]
+    private void criticalTimeRemainingClientRpc()
+    {
+        matchTimerText.color = criticalTimerTextColor;
+    }
     private void HandleMatchTimer(float previousValue, float newValue)
     {
         TimeSpan timeSpan = TimeSpan.FromSeconds(newValue);
@@ -120,8 +153,6 @@ public class MatchManager : NetworkBehaviour
     {
         GameObject killFeedGO = Instantiate(killFeedPrefab, killFeedParent, false);
 
-        startFadingOutKillFeed(killFeedGO);
-
         KillFeedData killFeedData = killFeedGO.GetComponent<KillFeedData>();
 
         setKillFeedTxtColors(shooterID, shotPlayerID, killFeedData);
@@ -153,10 +184,5 @@ public class MatchManager : NetworkBehaviour
             killFeedData.PlayerName1Txt.color = Color.black;
             killFeedData.PlayerName2Txt.color = Color.black;
         }
-    }
-
-    private void startFadingOutKillFeed(GameObject killFeedGO)
-    {
-        killFeedGO.GetComponent<FadeOutImage>().StartFading();
     }
 }

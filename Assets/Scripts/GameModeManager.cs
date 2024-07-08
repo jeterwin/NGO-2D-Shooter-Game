@@ -6,7 +6,14 @@ using UnityEngine.UI;
 
 public class GameModeManager : MonoBehaviour
 {
-    private GameMode currentGameMode;
+    public static GameModeManager Instance;
+
+    private GameMode currentGameMode = GameMode.Deathmatch;
+
+    private void Awake()
+    {
+        Instance = this;
+    }
 
     public GameMode CurrentGameMode
     {
@@ -15,8 +22,9 @@ public class GameModeManager : MonoBehaviour
 
     public enum GameMode
     {
-        DeathMatch,
-        FivevFive
+        Deathmatch,
+        FivevFive,
+        BattleRoyale
     }
 
     public void SetGameMode(int gameMode)

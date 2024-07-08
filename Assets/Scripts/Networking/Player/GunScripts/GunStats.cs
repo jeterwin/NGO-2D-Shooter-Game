@@ -2,17 +2,32 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public abstract class GunStats : MonoBehaviour
+public class GunStats : MonoBehaviour
 {
-    public int damage;
+    [Header("Gun Stats")]
+    public int Damage;
+    public int MagazineBullets;
+    public int BulletsConsumedPerShot = 1;
 
-    public float fireRate;
-    public int magazineBullets;
-    public int startingBullets;
+    public float FireRate, ReloadTime;
 
-    public GameObject bulletPrefab, clientBulletPrefab, serverBulletPrefab;
-    public Transform gunMuzzle; 
-    
-    public abstract void Fire();
+    [Space(5)]
+    [Header("Bullet Prefabs")]
+    public GameObject ClientBulletPrefab;
+    public GameObject ServerBulletPrefab;
 
+
+    [Space(5)]
+    [Header("Animation Names")]
+    public const string ShootAnimationName = "Shoot";
+    public const string ReloadAnimationName = "Reload";
+
+    [Space(5)]
+    [Header("Miscellaneous")]
+    public Transform GunMuzzle;
+
+    public Sprite gunSprite;
+
+    [Tooltip("Each sprite can have a different size, so we will multiply the width and height of the sprite to fit inside the gun UI.")]
+    public int SpriteSizeMultiplier = 1;
 }

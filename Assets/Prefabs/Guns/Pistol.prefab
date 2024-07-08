@@ -61,7 +61,7 @@ Transform:
   m_GameObject: {fileID: 5012416712031722689}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalPosition: {x: 3.91, y: 0, z: 0}
   m_LocalScale: {x: 1.25, y: 1.25, z: 1.25}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -132,18 +132,22 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 6a3eb7de24671264ba33d05df123c9ad, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  damage: 15
-  fireRate: 0.183
-  magazineBullets: 12
-  startingBullets: 12
-  bulletPrefab: {fileID: 1570335359649092007, guid: 6f0650765ab84362aca42c800ec54d89, type: 3}
-  clientBulletPrefab: {fileID: 6046974836645858157, guid: 7f56b9c8bed497b49853a2084f4171ec, type: 3}
-  serverBulletPrefab: {fileID: 2778499593818351107, guid: 474acc255c78e6f47978ff7e1131793b, type: 3}
-  gunMuzzle: {fileID: 7267603940082876417}
+  Damage: 15
+  MagazineBullets: 7
+  BulletsConsumedPerShot: 1
+  FireRate: 0.4
+  ReloadTime: 0.76666665
+  ClientBulletPrefab: {fileID: 6046974836645858157, guid: 7f56b9c8bed497b49853a2084f4171ec, type: 3}
+  ServerBulletPrefab: {fileID: 2778499593818351107, guid: 474acc255c78e6f47978ff7e1131793b, type: 3}
+  GunMuzzle: {fileID: 7267603940082876417}
+  gunSprite: {fileID: 21300000, guid: c1ff96636eabe024282641a866bc45c6, type: 3}
+  SpriteSizeMultiplier: 4
+  GunIndexInMasterGunList: 0
   shotsForRecoil: 4
-  recoilWhenMoving: 0.02
-  shootingMaxRecoil: 0.02
+  recoilWhenMoving: 0.03
+  shootingMaxRecoil: 0.03
   coolingDownTime: 1
+  GunshotInterval: 0
 --- !u!95 &1908908927693963552
 Animator:
   serializedVersion: 5
@@ -200,7 +204,7 @@ AudioSource:
   Priority: 128
   DopplerLevel: 0
   MinDistance: 0
-  MaxDistance: 10
+  MaxDistance: 50
   Pan2D: 0
   rolloffMode: 1
   BypassEffects: 0

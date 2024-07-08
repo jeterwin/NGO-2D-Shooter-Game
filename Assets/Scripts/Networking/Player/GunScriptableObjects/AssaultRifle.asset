@@ -1,0 +1,26 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5dc7818963195d344aec3c1d1611397f, type: 3}
+  m_Name: AssaultRifle
+  m_EditorClassIdentifier: 
+  GunPrefab: {fileID: 3558267362401152947, guid: b3766127cd31ffa4bb973ace1fea9b02, type: 3}
+  Damage: 2
+  MagazineBullets: 0
+  BulletsConsumedPerShot: 1
+  FireRate: 0
+  ReloadTime: 0
+  BulletPrefab: {fileID: 0}
+  ClientBulletPrefab: {fileID: 0}
+  ServerBulletPrefab: {fileID: 0}
+  GunMuzzle: {fileID: 0}
+  gunSprite: {fileID: 0}
+  SpriteSizeMultiplier: 1

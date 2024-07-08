@@ -12,7 +12,7 @@ EditorBuildSettings:
     path: Assets/Scenes/MainScene.unity
     guid: 3701c5f3420c3e24f8b5dd03fa4e6205
   - enabled: 1
-    path: Assets/Scenes/Spaceship.unity
+    path: Assets/Scenes/Deathmatch/SpaceshipDeathmatch.unity
     guid: c052c070148e26044883e10b5232132f
   m_configObjects:
     com.unity.input.settings: {fileID: 11400000, guid: db876b105ee657d418eedeed7f2d8aa4, type: 2}
