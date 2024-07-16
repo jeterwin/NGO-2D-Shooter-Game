@@ -24,6 +24,7 @@ public class PlayerData : NetworkBehaviour
     [SerializeField] private CameraScript cameraScript;
     [SerializeField] private WeaponSwitch weaponSwitch;
 
+    private Action onGameEnd;
     
     public override void OnNetworkDespawn()
     {
@@ -42,6 +43,7 @@ public class PlayerData : NetworkBehaviour
     {
         PlayerName.OnValueChanged += HandlePlayerNameChange;
         HandlePlayerNameChange("", PlayerName.Value);
+        onGameEnd += UpdateKills;
 
         if(IsServer)
         {
@@ -50,11 +52,6 @@ public class PlayerData : NetworkBehaviour
                 UserData = HostSingleton.Instance.GameManager.NetworkServer.GetUserDataByClientId(OwnerClientId);
 
                 PlayerName.Value = UserData.UserName;
-            }
-            else
-            {
-                
-                //userData = ClientSingleton.instance.GameManager.NetworkClient.get
             }
 
             OnPlayerSpawned?.Invoke(this);
@@ -72,5 +69,15 @@ public class PlayerData : NetworkBehaviour
         shootingScript.enabled = false;
         cameraScript.enabled = false;
         weaponSwitch.enabled = false;
+
+        if(IsOwner)
+        {
+            onGameEnd?.Invoke();
+        }
+    }
+
+    public void UpdateKills()
+    {
+        PlayFabLeaderboardManager.Instance.UpdatePlayFabStats(PlayerKills.Value, PlayerDeaths.Value);
     }
 }

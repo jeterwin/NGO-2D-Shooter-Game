@@ -44,6 +44,7 @@ public class MatchManager : NetworkBehaviour
     public override void OnNetworkSpawn()
     {
         matchTimer.OnValueChanged += HandleMatchTimer;
+        HandleMatchTimer(0, matchTimer.Value);
 
         if(!IsServer) { return; }
 
@@ -98,6 +99,8 @@ public class MatchManager : NetworkBehaviour
 
     private IEnumerator endSequence()
     {
+        // This is only called by the server
+
         matchTimerText.enabled = false;
         endScreen.SetActive(true);
 
@@ -114,15 +117,18 @@ public class MatchManager : NetworkBehaviour
         yield return null;
     }
 
-    private static void disablePlayersInputs()
+
+
+    private void disablePlayersInputs()
     {
         foreach (PlayerData playerData in Leaderboard.Instance.Players)
         {
+            if(playerData == null) { return; }
+
             playerData.DisablePlayerInputs();
         }
     }
-
-    private static void disconnectPlayers()
+    private void disconnectPlayers()
     {
         foreach (PlayerData playerData in Leaderboard.Instance.Players)
         {

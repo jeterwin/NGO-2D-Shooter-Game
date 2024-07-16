@@ -74,6 +74,7 @@ public class Leaderboard : NetworkBehaviour
         }
     }
 
+
     private void HandleLeaderboardChanged(NetworkListEvent<LeaderboardEntityState> changeEvent)
     {
         switch(changeEvent.Type)
@@ -102,15 +103,14 @@ public class Leaderboard : NetworkBehaviour
                 if(displayToRemove == null) { return; }
 
                 /// TODO REMOVE PLAYER FROM LIST WHEN DISCONNECTED
-                //Players[changeEvent.Value.] = null;
-                //displayToRemove.transform.SetParent(null);
+                
                 Destroy(displayToRemove.gameObject);
                 EntityDisplays.Remove(displayToRemove);
                 break;
 
             case NetworkListEvent<LeaderboardEntityState>.EventType.Value:
 
-                // This happens when the values have changed
+                // This happens when the kill/death values have changed
                 LeaderboardEntityDisplay displayToUpdate = EntityDisplays.FirstOrDefault(x => x.ClientId == changeEvent.Value.ClientId);
 
                 if(displayToUpdate == null) { return; }
@@ -205,6 +205,7 @@ public class Leaderboard : NetworkBehaviour
             break;
         }
 
+        //Players[player.OwnerClientId] = null;
         player.PlayerDeaths.OnValueChanged -= (oldDeaths, newDeaths) => handleDeathsChanged(player.OwnerClientId, newDeaths);
         player.PlayerKills.OnValueChanged -= (oldDeaths, newKills) => handleKillsChanged(player.OwnerClientId, newKills);
     }

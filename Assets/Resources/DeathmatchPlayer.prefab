@@ -1745,6 +1745,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   currentGun: {fileID: 0}
   playerData: {fileID: 5204801156805610843}
+  playerCrosshair: {fileID: 0}
   shootingCanvas: {fileID: 3307873743359818613}
   weaponLight: {fileID: 3204689628813173184}
 --- !u!114 &5813660829585398237

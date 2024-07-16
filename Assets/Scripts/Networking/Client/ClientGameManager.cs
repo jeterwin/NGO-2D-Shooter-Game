@@ -65,7 +65,7 @@ public class ClientGameManager : IDisposable
         transport.SetRelayServerData(relayServerData);
 
         UserData userData = new UserData{
-            UserName = PlayerPrefs.GetString(Launcher.PlayerPrefPlayerName, "Missing Name"),
+            UserName = PlayFabManager.Instance.PlayerName,
             UserAuthId = AuthenticationService.Instance.PlayerId
         };
 

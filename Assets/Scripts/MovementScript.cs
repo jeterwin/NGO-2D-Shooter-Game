@@ -1,17 +1,14 @@
-using System;
-using System.Collections;
-using System.Collections.Generic;
-using System.Threading.Tasks;
 using Unity.Netcode;
-using Unity.Services.Authentication;
 using UnityEngine;
 
 [RequireComponent(typeof(InputHandler), typeof(CameraScript), typeof(ShootingScript))]
+[RequireComponent(typeof(Health), typeof(HealthDisplay), typeof(WeaponSwitch))]
 public class MovementScript : NetworkBehaviour
 {
     [SerializeField] private float movementSpeed = 1f;
 
-    InputHandler inputHandler;
+    private Health health;
+    private InputHandler inputHandler;
     public override void OnNetworkSpawn()
     {
         if(!IsOwner) 
@@ -20,6 +17,7 @@ public class MovementScript : NetworkBehaviour
             return; 
         }
 
+        health = GetComponent<Health>();
         inputHandler = GetComponent<InputHandler>();
     }
 
@@ -31,7 +29,7 @@ public class MovementScript : NetworkBehaviour
     // Update is called once per frame
     void Update()
     {
-        if(!IsOwner) { return; }
+        if(!IsOwner || health.CurrentHealth.Value < 0f) { return; }
 
         Vector3 position = new Vector3(inputHandler.MovementVector.x, inputHandler.MovementVector.y, 0);
         transform.position += movementSpeed * Time.deltaTime * position;

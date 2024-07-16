@@ -6,6 +6,9 @@ using UnityEngine.SceneManagement;
 using System;
 using Unity.Netcode;
 using UnityEngine.UI;
+using PlayFab.ClientModels;
+using PlayFab;
+using System.Threading.Tasks;
 
 public class Launcher : MonoBehaviour
 {
@@ -21,8 +24,6 @@ public class Launcher : MonoBehaviour
 
     [Header("Player Name Settings")]
     [SerializeField] private TMP_InputField nameInputField;
-
-    [SerializeField] private TextMeshProUGUI playerNameLabel;
 
     [SerializeField] private Button setNameButton;
 
@@ -49,34 +50,6 @@ public class Launcher : MonoBehaviour
 
 
     #region Methods
-    private void Awake()
-    {
-        Instance = this;
-        print("Connecting to server.\n");
-        if(NetworkManager.Singleton == null)
-        {
-            Debug.Log("Not connected to servers.");
-            SceneManager.LoadScene(0);
-        }
-    }
-
-    private void Start()
-    {
-        if(SystemInfo.graphicsDeviceType == UnityEngine.Rendering.GraphicsDeviceType.Null)
-        {
-            return;
-        }
-
-        PlayerPrefs.DeleteKey(PlayerPrefPlayerName);
-
-        bool hasSetName = PlayerPrefs.HasKey(PlayerPrefPlayerName);
-
-        nameSelectPanel.SetActive(!hasSetName);
-        menuButtons.SetActive(hasSetName);
-
-        HandlePlayerNameChange();
-    }
-
     public void CloseGame()
     {
         Application.Quit();
@@ -109,19 +82,24 @@ public class Launcher : MonoBehaviour
         errorPanel.SetActive(true);
     }
 
-    public void HandlePlayerNameChange()
+
+    private void Awake()
     {
-        setNameButton.interactable = 
-            nameInputField.text.Length >= minNameLength && 
-            nameInputField.text.Length <= maxNameLength;
+        Instance = this;
+        print("Connecting to server.\n");
+        if(NetworkManager.Singleton == null)
+        {
+            Debug.Log("Not connected to servers.");
+            SceneManager.LoadScene(0);
+        }
     }
 
-    public void Connect()
+    private void Start()
     {
-        PlayerPrefs.SetString(PlayerPrefPlayerName, nameInputField.text);
-    
-        nameSelectPanel.SetActive(false);     
-        menuButtons.SetActive(true);
+        if (SystemInfo.graphicsDeviceType == UnityEngine.Rendering.GraphicsDeviceType.Null)
+        {
+            return;
+        }
     }
 }
 #endregion

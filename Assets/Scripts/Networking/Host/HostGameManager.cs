@@ -66,7 +66,7 @@ public class HostGameManager : IDisposable
                 }
             };
 
-            string playerName = PlayerPrefs.GetString(Launcher.PlayerPrefPlayerName, "Unknown");
+            string playerName = PlayFabManager.Instance.PlayerName;
             Lobby lobby = await Lobbies.Instance.CreateLobbyAsync($"{playerName}'s Lobby", MaxConnections, lobbyOptions);
 
             lobbyId = lobby.Id;
@@ -84,7 +84,7 @@ public class HostGameManager : IDisposable
         // The host doesn't set this data, so we should also send it over the network
         // so it doesn't return an error
         UserData userData = new UserData{
-            UserName = PlayerPrefs.GetString(Launcher.PlayerPrefPlayerName, "Missing Name"),
+            UserName = PlayFabManager.Instance.PlayerName,
             UserAuthId = AuthenticationService.Instance.PlayerId
         };
 
