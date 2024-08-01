@@ -1,7 +1,4 @@
-using System;
 using System.Collections;
-using System.Collections.Generic;
-using System.Threading;
 using Unity.Netcode;
 using UnityEngine;
 using UnityEngine.Rendering;
@@ -18,6 +15,9 @@ public class Health : NetworkBehaviour
     [SerializeField] private GameObject deathParticles;
     [SerializeField] private GameObject deathScreen;
 
+    [SerializeField] private int goldEarnedPerKill = 50;
+    [SerializeField] private int goldEarnedPerAssist = 20;
+
     [SerializeField] private float droppedWeaponRadius = 1.5f;
 
 
@@ -25,12 +25,10 @@ public class Health : NetworkBehaviour
     [SerializeField] private VolumeProfile volumeProfile;
 
     [SerializeField] private float smoothingTime = 1f;
+    [SerializeField] private float lensDistortionStrength = 0.15f;
+    [SerializeField] private float chromaticAberrationStrength = 0.2f;
 
     [SerializeField] private int criticalHealthPoint = 30;
-
-    [SerializeField] private float lensDistortionStrength = 0.15f;
-    
-    [SerializeField] private float chromaticAberrationStrength = 0.2f;
 
     [SerializeField] private GameObject killFeed;
 
@@ -38,16 +36,30 @@ public class Health : NetworkBehaviour
 
     [Space(5)]
     [Header("Health Settings")]
-
     [SerializeField] private PlayerData playerData;
-
     [SerializeField] private HealthDisplay healthDisplay;
 
     [SerializeField] private WeaponSwitch weaponSwitch;
 
+    private NetworkList<ulong> playersThatHitMe;
+
     private bool hasCriticalHealth;
 
     private Coroutine fadeInCoroutine;
+
+    # region Getters
+    public HealthDisplay HealthDisplay
+    {
+        get { return healthDisplay; }
+    }
+
+    public bool IsDead
+    {
+        get { return isDead.Value; }
+        set { isDead.Value = value; }
+    }
+
+    # endregion
 
     public override void OnNetworkDespawn()
     {
@@ -78,8 +90,19 @@ public class Health : NetworkBehaviour
         }
     }
 
+    private void Awake()
+    {
+        playersThatHitMe = new NetworkList<ulong>();
+    }
+
     public void TakeDamage(int damageValue, ulong shooterID)
     {
+        // We will track all the players that hit us in order to grant them gold when we die
+        if (!playersThatHitMe.Contains(shooterID))
+        {
+            playersThatHitMe.Add(shooterID);
+        }
+
         modifyHealth(-damageValue, shooterID);
         shakeEffect.StartShake();
     }
@@ -105,6 +128,7 @@ public class Health : NetworkBehaviour
             handleDying(shooterID);
         }
     }
+
     private void spawnDeathParticles()
     {
         if(!IsServer) { return; } 
@@ -112,6 +136,7 @@ public class Health : NetworkBehaviour
         GameObject go = Instantiate(deathParticles, transform.position, Quaternion.identity);
         go.GetComponent<NetworkObject>().Spawn(true);
     }
+
     private void handleDying(ulong shooterID)
     {
         isDead.Value = true;
@@ -122,18 +147,44 @@ public class Health : NetworkBehaviour
         playerData.PlayerDeaths.Value++;
 
         increaseShooterKillCount(shooterID);
+
+        if(ShopManager.Instance == null) { return; }
+
+        // Just for 5v5
+        grantAssistGold();
     }
 
     private void increaseShooterKillCount(ulong shooterID)
     {
         // Iterate through all the players and increase the kill count of the player that has the same name as the shooter
-        foreach (PlayerData player in Leaderboard.Instance.Players)
+        if(Leaderboard5v5.Instance != null)
         {
-            if (player.OwnerClientId != shooterID) { continue; }
+            foreach (PlayerData player in Leaderboard5v5.Instance.Players)
+            {
+                if (player.OwnerClientId != shooterID) { continue; }
 
-            player.PlayerKills.Value++;
-            MatchManager.Instance.createKillFeedServerRpc(player.PlayerName.Value, playerData.PlayerName.Value, player.OwnerClientId, OwnerClientId);
-            break;
+                player.PlayerKills.Value++;
+
+                // Only for 5v5
+                player.PlayerCoins.Value += goldEarnedPerKill;
+                MatchManager5v5.Instance.createKillFeedServerRpc(player.PlayerName.Value, 
+                    playerData.PlayerName.Value, player.OwnerClientId, OwnerClientId);
+                break;
+            }
+        }
+        else
+        {
+            foreach (PlayerData player in Leaderboard.Instance.Players)
+            {
+                if (player.OwnerClientId != shooterID) { continue; }
+
+                player.PlayerKills.Value++;
+
+                MatchManager.Instance.createKillFeedServerRpc(player.PlayerName.Value, 
+                    playerData.PlayerName.Value, player.OwnerClientId, OwnerClientId);
+                break;
+            }
+
         }
     }
 
@@ -218,17 +269,23 @@ public class Health : NetworkBehaviour
         yield return null;
     }
 
-    private void respawn(bool newValue)
+    private void respawn(bool isDead)
     {
-        if (newValue == true)
+        if (isDead == true)
         {
-            StartCoroutine(respawnCoroutine());
+            if(ShopManager.Instance != null)
+            {
+                StartCoroutine(respawnCoroutine5v5());
+            }
+            else
+            {
+                StartCoroutine(respawnCoroutine());
+            }
         }
     }
 
     private IEnumerator respawnCoroutine()
     {
-        isDead.Value = true;
         deathScreen.SetActive(true);
 
         dropGuns();
@@ -236,7 +293,7 @@ public class Health : NetworkBehaviour
         healthDisplay.OnDeath?.Invoke();
 
         float timer = 0f;
-        while (timer < PlayerSpawner.Instance.RespawnTime)
+        while (timer < PlayerSpawnerBase.Instance.RespawnTime)
         {
             timer += Time.deltaTime;
             yield return null;
@@ -250,7 +307,6 @@ public class Health : NetworkBehaviour
         deathScreen.SetActive(false);
         isDead.Value = false;
 
-        CurrentHealth.Value = MaxHealth;
         checkCriticalHealth();
 
         yield return null;
@@ -267,7 +323,7 @@ public class Health : NetworkBehaviour
             int index = weaponSwitch.AvailableGuns[i].GunIndexInMasterGunList;
 
             WeaponPickup droppedGun = Instantiate(weaponSwitch.MasterGunList.WeaponPickups[index], 
-                transform.position + UnityEngine.Random.insideUnitSphere * droppedWeaponRadius, Quaternion.identity);
+                transform.position + Random.insideUnitSphere * droppedWeaponRadius, Quaternion.identity);
             // Sync guns somehow
             droppedGun.GetComponent<NetworkObject>().Spawn();
         }
@@ -277,4 +333,46 @@ public class Health : NetworkBehaviour
     {
         transform.position = SpawnManager.Instance.GetSpawnPoint().position;
     }
+
+
+    #region 5v5 Methods
+
+    private IEnumerator respawnCoroutine5v5()
+    {
+        deathScreen.SetActive(true);
+
+        dropGuns();
+
+        healthDisplay.OnDeath?.Invoke();
+
+        MatchManager5v5.Instance.EliminatePlayerServerRpc(OwnerClientId);
+
+        float timer = 0f;
+        while (timer < PlayerSpawnerBase.Instance.RespawnTime)
+        {
+            timer += Time.deltaTime;
+            yield return null;
+        }
+
+        deathScreen.SetActive(false);
+
+        yield return null;
+    } 
+    private void grantAssistGold()
+    {
+        foreach (PlayerData player in Leaderboard5v5.Instance.Players)
+        {
+            foreach(ulong id in playersThatHitMe)
+            {
+                if (player.OwnerClientId != id) { continue; }
+
+                player.PlayerAssists.Value++;
+                player.PlayerCoins.Value += goldEarnedPerAssist;
+            }
+        }
+        playersThatHitMe.Clear();
+    }
+
+
+    #endregion
 }

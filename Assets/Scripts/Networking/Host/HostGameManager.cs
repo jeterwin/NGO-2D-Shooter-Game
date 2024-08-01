@@ -1,19 +1,18 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.Runtime.InteropServices;
+using System.Text;
 using System.Threading.Tasks;
 using Unity.Netcode;
 using Unity.Netcode.Transports.UTP;
 using Unity.Networking.Transport.Relay;
-using Unity.Services.Relay;
-using Unity.Services.Relay.Models;
-using UnityEngine.SceneManagement;
-using UnityEngine;
+using Unity.Services.Authentication;
 using Unity.Services.Lobbies;
 using Unity.Services.Lobbies.Models;
-using System.Text;
-using Unity.Services.Authentication;
+using Unity.Services.Relay;
+using Unity.Services.Relay.Models;
+using UnityEngine;
+using UnityEngine.SceneManagement;
 
 public class HostGameManager : IDisposable
 {
@@ -63,11 +62,18 @@ public class HostGameManager : IDisposable
                         visibility: DataObject.VisibilityOptions.Member,
                         value: joinCode
                     )
+                },
+                {
+                    "GameMode", new DataObject(
+                        visibility:  DataObject.VisibilityOptions.Public,
+                        value: GameModeManager.Instance.GameModeName
+                    )
                 }
             };
 
             string playerName = PlayFabManager.Instance.PlayerName;
-            Lobby lobby = await Lobbies.Instance.CreateLobbyAsync($"{playerName}'s Lobby", MaxConnections, lobbyOptions);
+
+            Lobby lobby = await Lobbies.Instance.CreateLobbyAsync($"{playerName}'s Game", MaxConnections, lobbyOptions);
 
             lobbyId = lobby.Id;
 
@@ -98,7 +104,18 @@ public class HostGameManager : IDisposable
 
         NetworkManager.Singleton.SceneManager.LoadScene(levelName, LoadSceneMode.Single);
     }
-
+    public async void LeaveLobby()
+    {
+        try
+        {
+            await LobbyService.Instance.RemovePlayerAsync(lobbyId, AuthenticationService.Instance.PlayerId);
+            Dispose();
+        } 
+        catch(LobbyServiceException e)
+        {
+            Debug.Log(e);
+        }
+    }
     private IEnumerator HeartbeatLobby(float waitTimeSeconds)
     {
         WaitForSecondsRealtime delay = new WaitForSecondsRealtime(waitTimeSeconds);
@@ -112,7 +129,6 @@ public class HostGameManager : IDisposable
 
     public async void Dispose()
     {
-        if(HostSingleton.instance)
         HostSingleton.Instance.StopCoroutine(nameof(HeartbeatLobby));
 
         if(!string.IsNullOrEmpty(lobbyId))

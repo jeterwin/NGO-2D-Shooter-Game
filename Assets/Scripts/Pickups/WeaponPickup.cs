@@ -12,18 +12,47 @@ public class WeaponPickup : Pickup
     {
         get { return SOGunReference; }
     }
-    private void OnTriggerStay2D(Collider2D collision)
-    {
-        if(!collision.CompareTag(PlayerTag)) { return; }
 
+    private GunSO gunReferenceCopy;
+
+    public GunSO GunReferenceCopy
+    {
+        get { return gunReferenceCopy; }
+    }
+
+    private Collider2D playerCollider;
+
+    private void Start()
+    {
+        gunReferenceCopy = Instantiate(SOGunReference);
+    }
+    private void Update()
+    {
         if(Input.GetKeyDown(KeyCode.E))
         {
-            collision.TryGetComponent(out WeaponSwitch weaponSwitch);
-            if (weaponSwitch != null)
-            {
-                AddGunServerRpc(weaponSwitch.NetworkObjectId);
-            }
+            if(playerCollider == null) { return; }
+
+            playerCollider.TryGetComponent(out WeaponSwitch weaponSwitch);
+
+            if(weaponSwitch == null) { return; }
+
+            if(weaponSwitch.AvailableGuns.Count + 1 > weaponSwitch.MaxAllowedGuns) { return; }
+
+            AddGunServerRpc(weaponSwitch.NetworkObjectId);
         }
+    }
+    private void OnTriggerEnter2D(Collider2D collider)
+    {
+        if(!collider.CompareTag(PlayerTag)) { return; }
+
+        playerCollider = collider;
+    }
+
+    private void OnTriggerExit2D(Collider2D collider)
+    {
+        if(!collider.CompareTag(PlayerTag)) { return; }
+
+        playerCollider = null;
     }
 
     [ServerRpc(RequireOwnership = false)]
@@ -31,17 +60,17 @@ public class WeaponPickup : Pickup
     {
         NetworkObject playerNetworkObject = NetworkManager.Singleton.SpawnManager.SpawnedObjects[playerNetworkObjectId];
 
-        if (playerNetworkObject != null)
-        {
-            var weaponSwitch = playerNetworkObject.GetComponent<WeaponSwitch>();
-            if (weaponSwitch != null)
-            {
-                GameObject gunInstance = Instantiate(SOGunReference.GunPrefab, weaponSwitch.GunParentTransform);
-                AddGunClientRpc(playerNetworkObjectId);
+        if(playerNetworkObject == null) { return; }
 
-                weaponSwitch.UpdateAvailableGuns();
-            }
-        }
+        WeaponSwitch weaponSwitch = playerNetworkObject.GetComponent<WeaponSwitch>();
+
+        if(weaponSwitch == null) { return; }
+
+        GameObject gunInstance = Instantiate(SOGunReference.GunPrefab, weaponSwitch.GunParentTransform);
+        AddGunClientRpc(playerNetworkObjectId);
+
+        weaponSwitch.UpdateAvailableGuns();
+
         Destroy(gameObject);
     }
 
@@ -52,16 +81,15 @@ public class WeaponPickup : Pickup
 
         NetworkObject playerNetworkObject = NetworkManager.Singleton.SpawnManager.SpawnedObjects[playerNetworkObjectId];
 
-        if (playerNetworkObject != null)
-        {
-            var weaponSwitch = playerNetworkObject.GetComponent<WeaponSwitch>();
-            if (weaponSwitch != null)
-            {
-                GameObject gunInstance = Instantiate(SOGunReference.GunPrefab, weaponSwitch.GunParentTransform);
-                AddGunClientRpc(playerNetworkObjectId);
+        if (playerNetworkObject == null) { return; }
 
-                weaponSwitch.UpdateAvailableGuns();
-            }
-        }
+        WeaponSwitch weaponSwitch = playerNetworkObject.GetComponent<WeaponSwitch>();
+
+        if (weaponSwitch == null) { return; }
+
+        GameObject gunInstance = Instantiate(SOGunReference.GunPrefab, weaponSwitch.GunParentTransform);
+        //AddGunClientRpc(playerNetworkObjectId);
+
+        weaponSwitch.UpdateAvailableGuns();
     }
 }

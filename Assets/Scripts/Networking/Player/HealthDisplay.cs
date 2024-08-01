@@ -46,15 +46,16 @@ public class HealthDisplay : NetworkBehaviour
         if(!IsClient) { return; }
 
         OnDeath += hideDeadPlayer;
-        OnRespawn += displayRespawnedPlayer;
+        OnRespawn += revealDeadPlayer;
         health.CurrentHealth.OnValueChanged += HandleHealthChanged;
     }
 
-    private void displayRespawnedPlayer()
+    private void revealDeadPlayer()
     {
         playerGuns.SetActive(true);
-        playerBody.enabled = true;
         playerNameTxt.SetActive(true);
+
+        playerBody.enabled = true;
         playerCollider.enabled = true;
     }
 

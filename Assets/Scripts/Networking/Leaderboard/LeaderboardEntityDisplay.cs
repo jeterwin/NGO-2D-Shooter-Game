@@ -1,28 +1,45 @@
-using System;
-using System.Collections;
-using System.Collections.Generic;
 using TMPro;
 using Unity.Collections;
 using UnityEngine;
-using UnityEngine.UIElements;
 
 public class LeaderboardEntityDisplay : MonoBehaviour
 {
     [SerializeField] private TextMeshProUGUI playerNameText;
-    [SerializeField] private TextMeshProUGUI playerDeathsText;
+
     [SerializeField] private TextMeshProUGUI playerKillsText;
+    [SerializeField] private TextMeshProUGUI playerAssistsText;
+    [SerializeField] private TextMeshProUGUI playerDeathsText;
+
+    public TextMeshProUGUI PlayerNameText
+    {
+        get { return playerNameText; } 
+    }
 
     public ulong ClientId { get; private set; }
+
     public int PlayerDeaths { get; private set; }
+
     public int PlayerKills { get; private set; }
 
+    public int PlayerAssists { get; private set; }
+
+    public int PlayerCoins { get; private set; }
+
+    public int PlayerTeam { get; private set; }
+
+
     public FixedString32Bytes PlayerName;
-    public void Initialise(ulong clientId, FixedString32Bytes playerName, int playerDeaths, int playerKills)
+
+    public void Initialise(ulong clientId, FixedString32Bytes playerName, int playerDeaths, int playerKills, int playerAssists,
+        int playerCoins, int playerTeam)
     {
         ClientId = clientId;
         PlayerName = playerName;
         PlayerDeaths = playerDeaths;
         PlayerKills = playerKills;
+        PlayerAssists = playerAssists;
+        PlayerCoins = playerCoins;
+        PlayerTeam = playerTeam;
 
         UpdateText();
     }
@@ -30,14 +47,16 @@ public class LeaderboardEntityDisplay : MonoBehaviour
     public void UpdateText()
     {
         playerNameText.text = PlayerName.Value;
-        playerDeathsText.text = PlayerDeaths.ToString();
         playerKillsText.text = PlayerKills.ToString();
+        playerAssistsText.text = PlayerAssists.ToString();
+        playerDeathsText.text = PlayerDeaths.ToString();
     }
 
-    public void UpdateStats(int newDeaths, int newKills)
+    public void UpdateStats(int newDeaths, int newKills, int newAssists)
     {
-        PlayerDeaths = newDeaths;
         PlayerKills = newKills;
+        PlayerAssists = newAssists;
+        PlayerDeaths = newDeaths;
 
         UpdateText();
     }

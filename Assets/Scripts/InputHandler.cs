@@ -1,9 +1,6 @@
-using System.Collections;
-using System.Collections.Generic;
+using Unity.Netcode;
 using UnityEngine;
 using UnityEngine.InputSystem;
-using System;
-using Unity.Netcode;
 public class InputHandler : NetworkBehaviour
 {
     private Controls controls;
@@ -11,15 +8,28 @@ public class InputHandler : NetworkBehaviour
     {
         get { return movementVector; }
     }
-    private Vector2 movementVector;
 
-    private Vector2 mouseInput;
+    public bool PressedShoot
+    {
+        get { return pressedShoot; }
+    }
 
+    public bool PressedReload
+    {
+        get { return pressedReload; }
+    }
     public Vector2 MouseInput
     {
         get { return mouseInput; }
     }
 
+    private bool pressedReload;
+
+    private bool pressedShoot;
+
+    private Vector2 mouseInput;
+
+    private Vector2 movementVector;
     public override void OnNetworkSpawn()
     {
         if(!IsOwner) 
@@ -39,6 +49,24 @@ public class InputHandler : NetworkBehaviour
         controls.Movement.Mouse.started += Mouse_started;
         controls.Movement.Mouse.canceled += Mouse_started;
         controls.Movement.Mouse.performed += Mouse_started;
+
+        controls.Movement.Shoot.started += Shoot_started;
+        controls.Movement.Shoot.canceled += Shoot_started;
+        controls.Movement.Shoot.performed += Shoot_started;
+
+        controls.Movement.Reload.started += Reload_started;
+        controls.Movement.Reload.canceled += Reload_started;
+        controls.Movement.Reload.performed += Reload_started;
+    }
+
+    private void Reload_started(InputAction.CallbackContext context)
+    {
+        pressedReload = context.ReadValueAsButton();
+    }
+
+    private void Shoot_started(InputAction.CallbackContext context)
+    {
+        pressedShoot = context.ReadValueAsButton();
     }
 
     public override void OnNetworkDespawn()
@@ -52,6 +80,15 @@ public class InputHandler : NetworkBehaviour
         controls.Movement.Mouse.started -= Mouse_started;
         controls.Movement.Mouse.canceled -= Mouse_started;
         controls.Movement.Mouse.performed -= Mouse_started;
+
+
+        controls.Movement.Shoot.started -= Shoot_started;
+        controls.Movement.Shoot.canceled -= Shoot_started;
+        controls.Movement.Shoot.performed -= Shoot_started;
+
+        controls.Movement.Reload.started -= Reload_started;
+        controls.Movement.Reload.canceled -= Reload_started;
+        controls.Movement.Reload.performed -= Reload_started;
 
         controls.Disable(); 
     }

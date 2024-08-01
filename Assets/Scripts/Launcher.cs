@@ -27,9 +27,6 @@ public class Launcher : MonoBehaviour
 
     [SerializeField] private Button setNameButton;
 
-    [SerializeField] private int minNameLength = 2;
-    [SerializeField] private int maxNameLength = 16;
-
     [Space(5)]
 
     [Header("Error Text")]

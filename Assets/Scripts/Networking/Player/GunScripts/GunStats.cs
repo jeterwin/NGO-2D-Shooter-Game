@@ -1,5 +1,3 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
 public class GunStats : MonoBehaviour
@@ -19,8 +17,8 @@ public class GunStats : MonoBehaviour
 
     [Space(5)]
     [Header("Animation Names")]
-    public const string ShootAnimationName = "Shoot";
-    public const string ReloadAnimationName = "Reload";
+    public string ShootAnimationName = "Shoot";
+    public string ReloadAnimationName = "Reload";
 
     [Space(5)]
     [Header("Miscellaneous")]

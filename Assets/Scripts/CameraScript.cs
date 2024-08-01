@@ -1,8 +1,6 @@
-using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
 using Cinemachine;
 using Unity.Netcode;
+using UnityEngine;
 
 public class CameraScript : NetworkBehaviour
 {

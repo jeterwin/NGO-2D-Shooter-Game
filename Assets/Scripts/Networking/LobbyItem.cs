@@ -9,6 +9,8 @@ public class LobbyItem : MonoBehaviour
 {
     [SerializeField] private TextMeshProUGUI lobbyNameText;
 
+    [SerializeField] private TextMeshProUGUI gameModeText;
+
     [SerializeField] private TextMeshProUGUI lobbyPlayersText;
 
     private LobbiesList lobbiesList;
@@ -21,6 +23,7 @@ public class LobbyItem : MonoBehaviour
         this.lobby = lobby;
 
         lobbyNameText.text = lobby.Name;
+        gameModeText.text = lobby.Data["GameMode"].Value;
         lobbyPlayersText.text = $"{lobby.Players.Count}/{lobby.MaxPlayers}";
     }
 

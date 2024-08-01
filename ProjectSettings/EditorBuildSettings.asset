@@ -14,5 +14,8 @@ EditorBuildSettings:
   - enabled: 1
     path: Assets/Scenes/Deathmatch/SpaceshipDeathmatch.unity
     guid: c052c070148e26044883e10b5232132f
+  - enabled: 1
+    path: Assets/Scenes/5v5/SpaceshipFivevFive.unity
+    guid: 72096ebcb32ebfc4fa9247ac6758a3d4
   m_configObjects:
     com.unity.input.settings: {fileID: 11400000, guid: db876b105ee657d418eedeed7f2d8aa4, type: 2}

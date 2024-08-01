@@ -1,5 +1,3 @@
-using System.Collections;
-using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
 
@@ -14,9 +12,10 @@ public class LeaderboardEntry : MonoBehaviour
     [SerializeField] private TextMeshProUGUI playerNameTxt;
     [SerializeField] private TextMeshProUGUI killsText;
     [SerializeField] private TextMeshProUGUI deathsText;
+    [SerializeField] private TextMeshProUGUI assistsText;
     [SerializeField] private TextMeshProUGUI kdaText;
 
-    public void SetDataText(string playerName, int kills, int deaths, int position)
+    public void SetDataText(string playerName, float kills, float deaths, float assists, int position)
     {
         switch(position)
         {
@@ -34,11 +33,13 @@ public class LeaderboardEntry : MonoBehaviour
 
         string killsString = kills.ToString();
         string deathsString = deaths.ToString();
+        string assistsString = assists.ToString();
 
         killsText.text = killsString;
         deathsText.text = deathsString;
+        assistsText.text = assistsString;
         
         // If we have 0 deaths we cannot divide by 0, so we just write 0 as the kda, even if we have kills
-        kdaText.text = deaths == 0 ? killsString : (kills / deaths).ToString();
+        kdaText.text = deaths == 0 ? killsString : ((kills + assists) / deaths).ToString("0.00");
     }
 }

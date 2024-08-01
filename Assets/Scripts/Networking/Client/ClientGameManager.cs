@@ -1,7 +1,4 @@
 using System;
-using System.Collections;
-using System.Collections.Generic;
-using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading.Tasks;
 using Unity.Netcode;
@@ -9,6 +6,7 @@ using Unity.Netcode.Transports.UTP;
 using Unity.Networking.Transport.Relay;
 using Unity.Services.Authentication;
 using Unity.Services.Core;
+using Unity.Services.Lobbies;
 using Unity.Services.Relay;
 using Unity.Services.Relay.Models;
 using UnityEngine;
@@ -77,7 +75,17 @@ public class ClientGameManager : IDisposable
 
         NetworkManager.Singleton.StartClient();
     }
-
+    public async void LeaveLobby()
+    {
+        try
+        {
+            await LobbyService.Instance.RemovePlayerAsync(joinAllocation.AllocationId.ToString(), AuthenticationService.Instance.PlayerId);
+        } 
+        catch(LobbyServiceException e)
+        {
+            Debug.Log(e);
+        }
+    }
     public void Dispose()
     {
         NetworkClient?.Dispose();

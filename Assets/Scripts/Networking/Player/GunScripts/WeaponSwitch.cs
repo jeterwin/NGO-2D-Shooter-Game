@@ -1,5 +1,3 @@
-using System;
-using System.Collections;
 using System.Collections.Generic;
 using TMPro;
 using Unity.Netcode;
@@ -12,20 +10,28 @@ public class WeaponSwitch : NetworkBehaviour
 
     [SerializeField] private List<Gun> availableGuns = new();
 
+    [Space(10)]
+    [Header("Transforms")]
     [SerializeField] private Transform gunParentTransform;
     [SerializeField] private Transform weaponPanelTransform;
 
+    [Space(10)]
+    [Header("Prefabs")]
     [SerializeField] private GameObject gunPrefabUI;
     [SerializeField] private GameObject emptyGunPrefab;
 
     [SerializeField] private List<Image> gunImages = new List<Image>();
 
+    [Space(10)]
+    [Header("Gun Colors")]
     [SerializeField] private Color unequippedGunColor;
     [SerializeField] private Color equippedGunColor;
 
     [SerializeField] private ShootingScript shootingScript;
 
     [SerializeField] private List<TextMeshProUGUI> bulletCountTxt = new List<TextMeshProUGUI>();
+
+    [SerializeField] private int maxGunsAllowed = 4; // How many guns the player can carry
 
     private NetworkVariable<int> currentGunIndex = new NetworkVariable<int>(0);
 
@@ -46,6 +52,11 @@ public class WeaponSwitch : NetworkBehaviour
     public int ListCount
     {
         get { return availableGuns.Count; }
+    }
+
+    public int MaxAllowedGuns
+    {
+        get { return maxGunsAllowed; }
     }
 
     public MasterGunList MasterGunList
@@ -70,11 +81,13 @@ public class WeaponSwitch : NetworkBehaviour
 
     int modulus(int a, int b)
     {
+        if(b == 0) { return 0; }
+
         return ((a%b) + b) % b;
     }
     private void Update()
     {
-        if (!IsOwner) { return; }
+        if (!IsOwner || availableGuns.Count == 0) { return; }
 
         oldCurrentGun = currentGunIndex.Value;
 
@@ -177,8 +190,6 @@ public class WeaponSwitch : NetworkBehaviour
         Instantiate(newGun, gunParentTransform);
 
         UpdateAvailableGuns();
-
-        
     }
 
   
@@ -188,8 +199,6 @@ public class WeaponSwitch : NetworkBehaviour
     {
         currentGunIndex.Value = index;
         ApplyWeaponChange();
-
-        //SwitchWeaponClientRpc(index);
     }
 
     [ClientRpc]
@@ -202,6 +211,8 @@ public class WeaponSwitch : NetworkBehaviour
 
     private void ApplyWeaponChange()
     {
+        if(availableGuns.Count == 0) { return; }
+
         shootingScript.SetWeapon(availableGuns[currentGunIndex.Value]);
 
         for (int i = 0; i < availableGuns.Count; i++)

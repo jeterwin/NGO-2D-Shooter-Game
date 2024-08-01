@@ -115,7 +115,8 @@ MonoBehaviour:
   shotsForRecoil: 2
   recoilWhenMoving: 0.03
   shootingMaxRecoil: 0.1
-  coolingDownTime: 1
+  coolingDownTime:
+    m_InternalValue: 0.5
   GunshotInterval: 0
 --- !u!95 &4281261112232922105
 Animator:

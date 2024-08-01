@@ -1,5 +1,3 @@
-using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using Unity.Netcode;
@@ -82,15 +80,12 @@ public class Leaderboard : NetworkBehaviour
             case NetworkListEvent<LeaderboardEntityState>.EventType.Add:
 
                 // This happens when a new player has joined
-/*                if(!entityDisplays.Any(x => x.ClientId == changeEvent.Value.ClientId)) 
-                {
-                    Instantiate(leaderboardEntryPrefab, leaderboardHolder);
-
-                }*/
                 Players = FindObjectsByType<PlayerData>(FindObjectsSortMode.None);
+
                 LeaderboardEntityDisplay display = Instantiate(leaderboardEntryPrefab, leaderboardHolder);
                 display.Initialise(changeEvent.Value.ClientId, changeEvent.Value.PlayerName, changeEvent.Value.PlayerDeaths,
-                    changeEvent.Value.PlayerKills);
+                    changeEvent.Value.PlayerKills, changeEvent.Value.PlayerAssists, changeEvent.Value.PlayerCoins
+                    ,changeEvent.Value.PlayerTeam);
 
                 EntityDisplays.Add(display);
                 break;
@@ -101,8 +96,6 @@ public class Leaderboard : NetworkBehaviour
                 LeaderboardEntityDisplay displayToRemove = EntityDisplays.FirstOrDefault(x => x.ClientId == changeEvent.Value.ClientId);
 
                 if(displayToRemove == null) { return; }
-
-                /// TODO REMOVE PLAYER FROM LIST WHEN DISCONNECTED
                 
                 Destroy(displayToRemove.gameObject);
                 EntityDisplays.Remove(displayToRemove);
@@ -115,7 +108,8 @@ public class Leaderboard : NetworkBehaviour
 
                 if(displayToUpdate == null) { return; }
 
-                displayToUpdate.UpdateStats(changeEvent.Value.PlayerDeaths, changeEvent.Value.PlayerKills);
+                displayToUpdate.UpdateStats(changeEvent.Value.PlayerDeaths, changeEvent.Value.PlayerKills, 
+                    changeEvent.Value.PlayerAssists);
                 break;
         }
 
@@ -149,12 +143,15 @@ public class Leaderboard : NetworkBehaviour
         leaderboardEntities.Add(new LeaderboardEntityState{
             ClientId = player.OwnerClientId,
             PlayerName = player.PlayerName.Value,
+            PlayerCoins = player.PlayerCoins.Value,
+            PlayerAssists = player.PlayerAssists.Value,
             PlayerDeaths = player.PlayerDeaths.Value,
             PlayerKills = player.PlayerKills.Value,
+            PlayerTeam = player.PlayerTeam.Value,
             });
 
         player.PlayerDeaths.OnValueChanged += (oldDeaths, newDeaths) => handleDeathsChanged(player.OwnerClientId, newDeaths);
-        player.PlayerKills.OnValueChanged += (oldDeaths, newKills) => handleKillsChanged(player.OwnerClientId, newKills);
+        player.PlayerKills.OnValueChanged += (oldKills, newKills) => handleKillsChanged(player.OwnerClientId, newKills);
     }
 
     private void handleDeathsChanged(ulong clientId, int newDeaths)
@@ -202,10 +199,14 @@ public class Leaderboard : NetworkBehaviour
             if(entity.ClientId != player.OwnerClientId) { continue; }
 
             leaderboardEntities.Remove(entity);
+
+            if(TeamManager.Instance != null)
+            {
+                TeamManager.Instance.RemovePlayerFromTeam(entity.ClientId);
+            }
             break;
         }
 
-        //Players[player.OwnerClientId] = null;
         player.PlayerDeaths.OnValueChanged -= (oldDeaths, newDeaths) => handleDeathsChanged(player.OwnerClientId, newDeaths);
         player.PlayerKills.OnValueChanged -= (oldDeaths, newKills) => handleKillsChanged(player.OwnerClientId, newKills);
     }

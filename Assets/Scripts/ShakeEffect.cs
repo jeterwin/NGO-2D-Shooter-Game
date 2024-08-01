@@ -16,8 +16,6 @@ public class ShakeEffect : NetworkBehaviour
     [Space(5)]
 
     [Header("Post Processing Settings")]
-    //[SerializeField] private PostProcessingV
-
     private CinemachineBasicMultiChannelPerlin multiChannelPerlin;
 
     private Coroutine shakeCoroutine;

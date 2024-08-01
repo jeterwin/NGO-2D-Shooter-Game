@@ -18,7 +18,6 @@ public class NetworkServer : IDisposable
 
         networkManager.ConnectionApprovalCallback += ApprovalCheck;
         networkManager.OnServerStarted += OnNetworkReady;
-
     }
 
     private void OnNetworkReady()
@@ -74,8 +73,8 @@ public class NetworkServer : IDisposable
         if(networkManager != null)
         {
             networkManager.ConnectionApprovalCallback -= ApprovalCheck;
-            networkManager.OnServerStarted -= OnNetworkReady;
             networkManager.OnClientDisconnectCallback -= OnClientDisconnect;
+            networkManager.OnServerStarted -= OnNetworkReady;
 
             if(networkManager.IsListening)
             {

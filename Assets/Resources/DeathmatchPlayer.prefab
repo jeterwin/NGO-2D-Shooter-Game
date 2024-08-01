@@ -1429,6 +1429,7 @@ GameObject:
   - component: {fileID: 8312303181758040124}
   - component: {fileID: 6267835696286639857}
   - component: {fileID: 5813660829585398237}
+  - component: {fileID: 6755709399886718132}
   m_Layer: 0
   m_Name: DeathmatchPlayer
   m_TagString: Player
@@ -1472,7 +1473,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d5a57f767e5e46a458fc5d3c628d0cbb, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  GlobalObjectIdHash: 886723198
+  GlobalObjectIdHash: 74963873
   InScenePlacedSourceGlobalObjectIdHash: 74963873
   AlwaysReplicateAsRoot: 0
   SynchronizeTransform: 1
@@ -1563,6 +1564,12 @@ MonoBehaviour:
     m_InternalValue: 0
   PlayerKills:
     m_InternalValue: 0
+  PlayerAssists:
+    m_InternalValue: 0
+  PlayerCoins:
+    m_InternalValue: 100
+  PlayerTeam:
+    m_InternalValue: -1
   playerNameTxt: {fileID: 4171090031592062951}
   movementScript: {fileID: 2573031975433449755}
   shootingScript: {fileID: 6267835696286639857}
@@ -1699,6 +1706,8 @@ MonoBehaviour:
   shakeEffect: {fileID: 6952653449254472086}
   deathParticles: {fileID: 8897721591248819324, guid: f2e399902c2316f4e8187bfaf379262c, type: 3}
   deathScreen: {fileID: 8415447029115535593}
+  goldEarnedPerKill: 50
+  goldEarnedPerAssist: 20
   droppedWeaponRadius: 3
   volumeProfile: {fileID: 0}
   smoothingTime: 2
@@ -1774,6 +1783,19 @@ MonoBehaviour:
   - {fileID: 0}
   - {fileID: 0}
   - {fileID: 0}
+  maxGunsAllowed: 4
+--- !u!114 &6755709399886718132
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4331853392058887079}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 12497b7056ccb0a40838d42eacc59ab6, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &4550873517126886399
 GameObject:
   m_ObjectHideFlags: 0

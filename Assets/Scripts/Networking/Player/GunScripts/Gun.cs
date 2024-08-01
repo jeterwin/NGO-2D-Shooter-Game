@@ -37,6 +37,8 @@ public class Gun : GunStats
 
     private Animator gunAnimator;
 
+    private NetworkObject networkObject;
+
     private InputHandler inputHandler;
 
     private TextMeshProUGUI bulletCountTxt;
@@ -86,16 +88,6 @@ public class Gun : GunStats
         handleConsecutiveShootingTimer();
 
         if(isReloading) { return; }
-
-        if(Input.GetKeyDown(KeyCode.R))
-        {
-            if(reloadCoroutine != null)
-            {
-                StopCoroutine(reloadCoroutine);
-                reloadCoroutine = null;
-            }
-            reloadCoroutine = StartCoroutine(reload());
-        }
     }
 
     private void handleConsecutiveShootingTimer()
@@ -108,6 +100,7 @@ public class Gun : GunStats
     public void InitializeGun(InputHandler inputHandler)
     {
         this.inputHandler = inputHandler;
+
         remainingBullets = MagazineBullets;
 
         UpdateBulletCountText();
@@ -124,15 +117,19 @@ public class Gun : GunStats
         if (isReloading)
         {
             remainingBullets = 0;
-            if(reloadCoroutine != null)
-            {
-                StopCoroutine(reloadCoroutine);
-                reloadCoroutine = null;
-            }
-            reloadCoroutine = StartCoroutine(reload());
+            HandleReload();
         }
     }
 
+    public void HandleReload()
+    {
+        if (reloadCoroutine != null)
+        {
+            StopCoroutine(reloadCoroutine);
+            reloadCoroutine = null;
+        }
+        reloadCoroutine = StartCoroutine(reload());
+    }
 
     public void RestoreAmmo(int ammoCount)
     {
@@ -161,12 +158,7 @@ public class Gun : GunStats
         if (remainingBullets < 1)
         {
             remainingBullets = 0;
-            if(reloadCoroutine != null)
-            {
-                StopCoroutine(reloadCoroutine);
-                reloadCoroutine = null;
-            }
-            reloadCoroutine = StartCoroutine(reload());
+            HandleReload();
         }
 
     }
@@ -176,16 +168,20 @@ public class Gun : GunStats
         bulletCountTxt.text = remainingBullets + "/" + MagazineBullets;
     }
 
-    private IEnumerator reload()
+    public IEnumerator reload()
     {
         isReloading = true;
-        gunAnimator.Play(ReloadAnimationName);
         yield return new WaitForSeconds(ReloadTime);
 
         remainingBullets = MagazineBullets;
         UpdateBulletCountText();
         isReloading = false;
         yield return null;
+    }
+
+    public void PlayReloadAnimation()
+    {
+        gunAnimator.Play(ReloadAnimationName);
     }
 
     public Vector3 GetRecoil()
@@ -219,7 +215,7 @@ public class Gun : GunStats
         if (inputHandler.MovementVector.magnitude != 0f)
         {
             // We're moving, so we'll randomize a float between -GunRecoil and +GunRecoil.
-            float randomXRecoil = UnityEngine.Random.Range(0, RecoilWhenMoving);
+            float randomXRecoil = Random.Range(0, RecoilWhenMoving);
             float randomYRecoil = Random.Range(-RecoilWhenMoving, RecoilWhenMoving);
 
             recoilTransform += new Vector3(randomXRecoil, randomYRecoil, 0);

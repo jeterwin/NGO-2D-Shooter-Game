@@ -1,7 +1,3 @@
-using System;
-using System.Collections;
-using System.Collections.Generic;
-using System.Transactions;
 using Unity.Netcode;
 using UnityEngine;
 
@@ -59,9 +55,9 @@ public class ShootingScript : NetworkBehaviour
     }
     private void Update()
     {
-        if (!IsOwner) { return; }
+        if (!IsOwner || currentGun == null) { return; }
 
-        if (Input.GetMouseButtonDown(0))
+        if (Input.GetMouseButton(0))
         {
             if (!currentGun.CanShoot) { return; }
 
@@ -79,7 +75,7 @@ public class ShootingScript : NetworkBehaviour
 
     private void handleShootingTimer()
     {
-        if (CurrentGun.GunshotInterval <= 0f) { return; }
+        if (currentGun.GunshotInterval <= 0f) { return; }
 
         currentGun.GunshotInterval -= Time.deltaTime;
     }
@@ -101,11 +97,12 @@ public class ShootingScript : NetworkBehaviour
         if (bullet.TryGetComponent(out BulletScript bulletScript))
         {
             bulletScript.SetBulletDamage(currentGun.Damage);
+            bulletScript.SetShooterTeam(playerData.PlayerTeam.Value);
         }
 
         if(bullet.TryGetComponent(out DamageOnImpact bulletDamageOnImpact))
         {
-            bulletDamageOnImpact.ShooterID = OwnerClientId;
+            bulletDamageOnImpact.SetShooterData(shooterID, playerData.PlayerTeam.Value);
         }
 
         PrimaryFireClientRpc();
@@ -136,6 +133,7 @@ public class ShootingScript : NetworkBehaviour
         if (bullet.TryGetComponent(out BulletScript bulletScript))
         {
             bulletScript.Rb.velocity = bullet.transform.right * bulletScript.ProjectileSpeed;
+            bulletScript.SetShooterTeam(playerData.PlayerTeam.Value);
         }
 
         return bullet;
